@@ -8,7 +8,7 @@
 
 namespace alfons {
 
-class Alfons : protected TextRenderer, protected TextureCallback {
+class Alfons : protected MeshCallback, protected TextureCallback {
 public:
     Alfons();
 
