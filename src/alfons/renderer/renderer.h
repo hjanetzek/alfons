@@ -62,7 +62,7 @@ struct QuadBatch {
     }
 };
 
-class Renderer : public TextRenderer, public TextureCallback {
+class Renderer : public MeshCallback, public TextureCallback {
 
 public:
     void draw();

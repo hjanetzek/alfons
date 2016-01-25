@@ -20,8 +20,8 @@
 
 namespace alfons {
 
-TextBatch::TextBatch(GlyphAtlas& _atlas, TextRenderer& _renderer)
-    : m_atlas(_atlas), m_renderer(_renderer) {}
+TextBatch::TextBatch(GlyphAtlas& _atlas, MeshCallback& _mesh)
+    : m_atlas(_atlas), m_mesh(_mesh) {}
 
 void TextBatch::setClip(const Rect& _clipRect) {
     m_clip = _clipRect;
@@ -82,7 +82,7 @@ void TextBatch::drawShape(const Font& _font, const Shape& _shape,
         return;
     }
 
-    m_renderer.drawGlyph(rect, atlasGlyph);
+    m_mesh.drawGlyph(rect, atlasGlyph);
 }
 
 void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
@@ -102,7 +102,7 @@ void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
         return;
     }
 
-    m_renderer.drawGlyph(quad, atlasGlyph);
+    m_mesh.drawGlyph(quad, atlasGlyph);
 }
 
 glm::vec2 TextBatch::draw(const LineLayout& line, glm::vec2 offset) {
