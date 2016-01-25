@@ -60,7 +60,7 @@ bool TextBatch::clip(Quad& _quad) const {
 
 void TextBatch::setupRect(const Shape& _shape, const glm::vec2& _position,
                           float _sizeRatio, Rect& _rect, AtlasGlyph& _atlasGlyph) {
-    
+
     glm::vec2 ul = _position + (_shape.position + _atlasGlyph.glyph->offset) * _sizeRatio;
     _rect.x1 = ul.x;
     _rect.y1 = ul.y;
@@ -117,8 +117,9 @@ glm::vec2 TextBatch::draw(const LineLayout& line, size_t start, size_t end,
 
         for (size_t j = start; j < end; j++) {
             auto& c = line.shapes()[j];
-            if (!c.isSpace)
+            if (!c.isSpace) {
                 drawShape(line.font(), c, offset, line.scale());
+            }
 
             offset.x += line.advance(c);
             if (c.mustBreak) {
@@ -130,8 +131,9 @@ glm::vec2 TextBatch::draw(const LineLayout& line, size_t start, size_t end,
         int i = 0;
         for (size_t j = start; j < end; j++) {
             auto& c = line.shapes()[j];
-            if (!c.isSpace)
+            if (!c.isSpace) {
                 drawShape(line.font(), c, offset + line.offsets[i++], line.scale());
+            }
         }
     }
     offset.y += line.height();
@@ -146,7 +148,7 @@ glm::vec2 TextBatch::draw(const LineLayout& line, glm::vec2 offset, float width)
     float startX = offset.x;
 
     float adv = 0;
-    
+
     for (auto& c : line.shapes()) {
         wordLength++;
 
@@ -154,20 +156,21 @@ glm::vec2 TextBatch::draw(const LineLayout& line, glm::vec2 offset, float width)
         if (c.canBreak || c.mustBreak) {
             offset.x = draw(line, wordStart, wordStart + wordLength, offset).x;
             adv = std::max(adv, offset.x);
-            
+
             wordStart += wordLength;
             wordLength = 0;
             lineWidth = offset.x - startX;
-            
+
         } else {
             lineWidth += line.advance(c);
-            if (lineWidth > width) {
+        }
 
-                if (offset.x > startX) {
-                    offset.y += line.height();
-                    lineWidth = 0;
-                }
+        if (lineWidth > width) {
+            // only go to next line if chars have been added on the current line
+            if (offset.x > startX) {
+                offset.y += line.height();
                 offset.x = startX;
+                lineWidth = 0;
             }
         }
     }
@@ -184,7 +187,7 @@ float TextBatch::draw(const LineLayout& line, const LineSampler& path,
 
     bool reverse = false; //(line.direction() == HB_DIRECTION_RTL);
     float direction = reverse ? -1 : 1;
-    float sampleSize = 0.1 * line.height();
+    // float sampleSize = 0.1 * line.height();
 
     auto& font = line.font();
     float scale = line.scale();
