@@ -21,13 +21,13 @@
 
 namespace alfons {
 
-class TextRenderer;
+struct MeshCallback;
 struct AtlasGlyph;
 class GlyphAtlas;
 
 class TextBatch {
 public:
-    TextBatch(GlyphAtlas& _atlas, TextRenderer& _renderer);
+    TextBatch(GlyphAtlas& _atlas, MeshCallback& _mesh);
 
     void setClip(const Rect& clipRect);
     void setClip(float x1, float y1, float x2, float y2);
@@ -65,7 +65,7 @@ public:
 
 protected:
     GlyphAtlas& m_atlas;
-    TextRenderer& m_renderer;
+    MeshCallback& m_mesh;
 
     bool m_hasClip = false;
     Rect m_clip;
