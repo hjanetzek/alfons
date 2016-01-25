@@ -11,8 +11,7 @@
 #include "textShaper.h"
 
 #include <hb.h>
-#include "linebreak/linebreak.h"
-
+#include "linebreak.h"
 #include "scrptrun.h"
 #include "unicode/unistr.h"
 #include "unicode/uscript.h"
@@ -310,8 +309,12 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
         auto clusterId = glyphInfos[pos].cluster;
 
         auto id = clusterId;
-        if (_run.direction == HB_DIRECTION_RTL)
-            id = _run.end - clusterId;
+        // Map cluster position to visual LTR order
+        if (_run.direction == HB_DIRECTION_RTL) {
+            id = _run.end - clusterId - 1;
+        } else {
+            id = clusterId - _run.start;
+        }
 
         if (codepoint == 0) {
             log("missing glyphs");
@@ -319,8 +322,10 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
             continue;
         }
 
-        if (m_glyphAdded[id] && m_shapes[pos].face != _face.id()) {
+        if (m_glyphAdded[id] && m_shapes[id].face != _face.id()) {
             // cluster found, with another font (e.g. 'space')
+            log("skip glyph %d/%d pos:%d", id, clusterId, pos);
+
             continue;
         }
 
@@ -330,20 +335,19 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
         float advance = glyphPositions[pos].x_advance * _face.scale().x;
 
         auto bufferPos = clusterId - _run.start;
-        log("add cluster %d/%d linebreak:%d", id, clusterId,
-            m_linebreaks[bufferPos]);
+        log("add glyph %d/%d pos:%d linebreak:%d", id, clusterId, pos, m_linebreaks[bufferPos]);
 
-        if (m_glyphAdded[pos]) {
-            m_glyphAdded[pos] = 2;
+        if (m_glyphAdded[id]) {
+            m_glyphAdded[id] = 2;
 
             LOGI("CLUSTER FOUND! %d", codepoint);
             if (m_clusters.size() < m_shapes.size()) {
                 m_clusters.resize(m_shapes.size());
             }
-            m_clusters[pos].emplace_back(_face.id(), codepoint, offset, advance, 0);
+            m_clusters[id].emplace_back(_face.id(), codepoint, offset, advance, 0);
 
         } else {
-            m_glyphAdded[pos] = 1;
+            m_glyphAdded[id] = 1;
 
             uint8_t breakmode = m_linebreaks[bufferPos];
             if (breakmode == 0) breakmode = 1;
@@ -354,7 +358,7 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
                 ((breakmode == 2) << 3) | // no break
                 (_face.isSpace(codepoint) << 4);
 
-            m_shapes[pos] = Shape(_face.id(), codepoint, offset, advance, flags);
+            m_shapes[id] = Shape(_face.id(), codepoint, offset, advance, flags);
         }
     }
 
@@ -424,7 +428,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
                 setMax(lineMetrics.underlineOffset, metrics.underlineOffset);
                 break;
             }
-            log("missing glyph for lang: %s", run.language);
+            log("missing glyph for lang: %s", hb_language_to_string(run.language));
 
             // TODO check why the contents must be set again!
             // - check if it is possible to only reset the hb_buffer position
