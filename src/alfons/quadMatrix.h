@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "quad.h"
+#include "alfons.h"
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
