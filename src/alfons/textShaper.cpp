@@ -11,7 +11,8 @@
 #include "textShaper.h"
 
 #include <hb.h>
-#include "linebreak/linebreak.h"
+#include "linebreak.h"
+// #include "linebreak/linebreak.h"
 
 #include "scrptrun.h"
 #include "unicode/unistr.h"
