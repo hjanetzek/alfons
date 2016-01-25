@@ -22,7 +22,6 @@ target_include_directories (alfons
 
 target_link_libraries (alfons
   LINK_PUBLIC
-  PUBLIC
   linebreak
   ${ALFONS_DEPS_LIBRARIES})
 
