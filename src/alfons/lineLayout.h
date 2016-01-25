@@ -93,7 +93,9 @@ public:
           m_scale(1) {
 
             for (auto& shape : m_shapes) {
-                m_advance += shape.advance;
+                if (shape.flags != 0) {
+                    m_advance += shape.advance;
+                }
             }
         }
 

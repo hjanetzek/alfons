@@ -426,21 +426,20 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
             }
             log("missing glyph for lang: %s", run.language);
 
+            // TODO check why the contents must be set again!
+            // - check if it is possible to only reset the hb_buffer position
+            // - or determine the font used for each run in advance.
             hb_buffer_clear_contents(m_hbBuffer);
-
             hb_buffer_add_utf16(m_hbBuffer, _line.text->getBuffer(),
                                 _line.text->length(),
                                 run.start, run.end - run.start);
 
             hb_buffer_set_script(m_hbBuffer, run.script);
             hb_buffer_set_direction(m_hbBuffer, run.direction);
-
-            // const char* lang = nullptr;
             if (run.language == HB_LANGUAGE_INVALID) {
                 hb_buffer_set_language(m_hbBuffer, hb_language_get_default());
             } else {
                 hb_buffer_set_language(m_hbBuffer, run.language);
-                // lang = hb_language_to_string(run.language);
             }
         }
 
@@ -448,12 +447,12 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
             if (m_glyphAdded[i]) {
                 shapes.push_back(m_shapes[i]);
 
-                // if (m_glyphAdded[i] == 2) {
-                //     for (auto& shape : m_clusters[i]) {
-                //         shapes.push_back(shape);
-                //     }
-                //     m_clusters[i].clear();
-                // }
+                if (m_glyphAdded[i] == 2) {
+                    for (auto& shape : m_clusters[i]) {
+                        shapes.push_back(shape);
+                    }
+                    m_clusters[i].clear();
+                }
             }
         }
     }
