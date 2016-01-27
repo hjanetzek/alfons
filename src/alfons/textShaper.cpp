@@ -373,6 +373,8 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
         return LineLayout();
     }
 
+    hb_language_t defaultLang = hb_language_get_default();
+
     int numChars = _range.back().end;
 
     std::vector<Shape> shapes;
@@ -402,7 +404,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
 
         const char* lang = nullptr;
         if (run.language == HB_LANGUAGE_INVALID) {
-            hb_buffer_set_language(m_hbBuffer, hb_language_get_default());
+            hb_buffer_set_language(m_hbBuffer, defaultLang);
         } else {
             hb_buffer_set_language(m_hbBuffer, run.language);
             lang = hb_language_to_string(run.language);
@@ -441,7 +443,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
             hb_buffer_set_script(m_hbBuffer, run.script);
             hb_buffer_set_direction(m_hbBuffer, run.direction);
             if (run.language == HB_LANGUAGE_INVALID) {
-                hb_buffer_set_language(m_hbBuffer, hb_language_get_default());
+                hb_buffer_set_language(m_hbBuffer, defaultLang);
             } else {
                 hb_buffer_set_language(m_hbBuffer, run.language);
             }
