@@ -42,7 +42,7 @@ bool glfwLoop(int width = S_WIDTH, int height = S_HEIGHT) {
     glfwSwapInterval(1);
 
     glfwSetTime(0);
-    double prevt = glfwGetTime();
+    // double prevt = glfwGetTime();
 
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
@@ -50,12 +50,13 @@ bool glfwLoop(int width = S_WIDTH, int height = S_HEIGHT) {
     onSetup(fbWidth, fbHeight);
 
     while (!glfwWindowShouldClose(window)) {
-        double mx, my, t, dt;
+        double mx, my;
+        //double t, dt;
         int winWidth, winHeight;
 
-        t = glfwGetTime();
-        dt = t - prevt;
-        prevt = t;
+        // t = glfwGetTime();
+        // dt = t - prevt;
+        // prevt = t;
         glfwGetCursorPos(window, &mx, &my);
         glfwGetWindowSize(window, &winWidth, &winHeight);
         glfwGetFramebufferSize(window, &fbWidth, &fbHeight);

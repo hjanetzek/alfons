@@ -105,114 +105,115 @@ void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
     m_mesh.drawGlyph(quad, atlasGlyph);
 }
 
-glm::vec2 TextBatch::draw(const LineLayout& line, glm::vec2 offset) {
-    return draw(line, 0, line.shapes().size(), offset);
+glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _offset) {
+    return draw(_line, 0, _line.shapes().size(), _offset);
 }
 
-glm::vec2 TextBatch::draw(const LineLayout& line, size_t start, size_t end,
-                          glm::vec2 offset) {
+glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
+                          glm::vec2 _offset) {
 
-    if (line.offsets.empty()) {
-        float startX = offset.x;
+    if (_line.offsets.empty()) {
+        float startX = _offset.x;
 
-        for (size_t j = start; j < end; j++) {
-            auto& c = line.shapes()[j];
+        for (size_t j = _start; j < _end; j++) {
+            auto& c = _line.shapes()[j];
             if (!c.isSpace) {
-                drawShape(line.font(), c, offset, line.scale());
+                drawShape(_line.font(), c, _offset, _line.scale());
             }
 
-            offset.x += line.advance(c);
+            _offset.x += _line.advance(c);
             if (c.mustBreak) {
-                offset.x = startX;
-                offset.y += line.height();
+                _offset.x = startX;
+                _offset.y += _line.height();
             }
         }
     } else {
         int i = 0;
-        for (size_t j = start; j < end; j++) {
-            auto& c = line.shapes()[j];
+        for (size_t j = _start; j < _end; j++) {
+            auto& c = _line.shapes()[j];
             if (!c.isSpace) {
-                drawShape(line.font(), c, offset + line.offsets[i++], line.scale());
+                drawShape(_line.font(), c, _offset + _line.offsets[i++], _line.scale());
             }
         }
     }
-    offset.y += line.height();
-    return offset;
+    _offset.y += _line.height();
+
+    return _offset;
 }
 
-glm::vec2 TextBatch::draw(const LineLayout& line, glm::vec2 offset, float width) {
+glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _offset, float _width) {
 
     float lineWidth = 0;
     int wordLength = 0;
     int wordStart = 0;
-    float startX = offset.x;
+    float startX = _offset.x;
 
     float adv = 0;
 
-    for (auto& c : line.shapes()) {
+    for (auto& c : _line.shapes()) {
         wordLength++;
 
         // is break - or must break?
         if (c.canBreak || c.mustBreak) {
-            offset.x = draw(line, wordStart, wordStart + wordLength, offset).x;
-            adv = std::max(adv, offset.x);
+            _offset.x = draw(_line, wordStart, wordStart + wordLength, _offset).x;
+            adv = std::max(adv, _offset.x);
 
             wordStart += wordLength;
             wordLength = 0;
-            lineWidth = offset.x - startX;
+            lineWidth = _offset.x - startX;
 
         } else {
-            lineWidth += line.advance(c);
+            lineWidth += _line.advance(c);
         }
 
-        if (lineWidth > width) {
+        if (lineWidth > _width) {
             // only go to next line if chars have been added on the current line
-            if (offset.x > startX) {
-                offset.y += line.height();
-                offset.x = startX;
+            if (_offset.x > startX) {
+                _offset.y += _line.height();
+                _offset.x = startX;
                 lineWidth = 0;
             }
         }
     }
     if (wordLength > 0) {
-        adv = std::max(adv, draw(line, wordStart, wordStart + wordLength, offset).x);
+        adv = std::max(adv, draw(_line, wordStart, wordStart + wordLength, _offset).x);
     }
-    offset.y += line.height();
-    offset.x = adv;
-    return offset;
+    _offset.y += _line.height();
+    _offset.x = adv;
+    return _offset;
 }
 
-float TextBatch::draw(const LineLayout& line, const LineSampler& path,
-                      float offsetX, float offsetY) {
+float TextBatch::draw(const LineLayout& _line, const LineSampler& _path,
+                      float _offsetX, float _offsetY) {
 
     bool reverse = false; //(line.direction() == HB_DIRECTION_RTL);
     float direction = reverse ? -1 : 1;
     // float sampleSize = 0.1 * line.height();
 
-    auto& font = line.font();
-    float scale = line.scale();
+    auto& font = _line.font();
+    float scale = _line.scale();
 
     glm::vec2 position;
     float angle;
 
-    for (auto& shape : DirectionalRange(line.shapes(), reverse)) {
+    for (auto& shape : DirectionalRange(_line.shapes(), reverse)) {
         //float half = 0.5f * line.advance(shape) * direction;
         float half = 0.5f * shape.advance * scale * direction;
-        offsetX += half;
+        _offsetX += half;
 
         if (!shape.isSpace) {
-            path.get(offsetX, position, angle);
+            _path.get(_offsetX, position, angle);
 
             m_matrix.setTranslation(position);
 
             //m_matrix.rotateZ(path.offset2SampledAngle(offsetX, sampleSize));
             m_matrix.rotateZ(angle);
 
-            drawTransformedShape(font, shape, -half, offsetY, scale);
+            drawTransformedShape(font, shape, -half, _offsetY, scale);
         }
-        offsetX += half;
+        _offsetX += half;
     }
-    return offsetX;
+    return _offsetX;
 }
 
 }
