@@ -8,7 +8,7 @@
 #define S_WIDTH 600
 
 void onSetup(int w, int h);
-void onDraw(int w, int h);
+void onDraw(GLFWwindow* window, int fbWidth, int fbHeight);
 
 static void key(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -67,7 +67,7 @@ bool glfwLoop(int width = S_WIDTH, int height = S_HEIGHT) {
                 GL_DEPTH_BUFFER_BIT |
                 GL_STENCIL_BUFFER_BIT);
 
-        onDraw(fbWidth, fbHeight);
+        onDraw(window, fbWidth, fbHeight);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

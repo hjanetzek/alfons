@@ -10,8 +10,11 @@
 #include "logger.h"
 #include "demoRenderer.h"
 
-#define TEXT_SIZE 16
-#define DEFAULT "DroidSans.ttf"
+#define TEXT_SIZE 20
+#define DEFAULT "NotoSans-Regular.ttf"
+#define FONT_AR "NotoNaskh-Regular.ttf"
+#define FONT_HE "NotoSansHebrew-Regular.ttf"
+#define FONT_HI "NotoSansDevanagari-Regular.ttf"
 #define FONT_JA "DroidSansJapanese.ttf"
 #define FALLBACK "DroidSansFallback.ttf"
 
@@ -30,24 +33,32 @@ void onSetup(int w, int h) {
     renderer.init();
 
     font = fontMan.addFont(DEFAULT, TEXT_SIZE);
+    font->addFace(fontMan.getFontFace(InputSource(FONT_AR), TEXT_SIZE));
+    font->addFace(fontMan.getFontFace(InputSource(FONT_HE), TEXT_SIZE));
+    font->addFace(fontMan.getFontFace(InputSource(FONT_HI), TEXT_SIZE));
     font->addFace(fontMan.getFontFace(InputSource(FONT_JA), TEXT_SIZE));
     font->addFace(fontMan.getFontFace(InputSource(FALLBACK), TEXT_SIZE));
 
-    l.push_back(shaper.shape(font, "Eß hatte aber alle Welt önerlei Zünge und Spräche."));
+    l.push_back(shaper.shape(font, "Eß hatte aber alle Welt einerlei Zünge und Sprache."));
     l.push_back(shaper.shape(font, "وَكَانَتِ الارْضُ كُلُّهَا لِسَانا وَاحِدا وَلُغَةً وَاحِدًَ.")); // ar
     l.push_back(shaper.shape(font, "ΚΑΙ ολόκληρη η γη ήταν μιας γλώσσας, και μιας φωνής.")); // el
     l.push_back(shaper.shape(font, "And the whole earth was of one language, and of one speech."));
     l.push_back(shaper.shape(font, "ERA entonces toda la tierra de una lengua y unas mismas palabras."));
     l.push_back(shaper.shape(font, "Toute la terre avait une seule langue et les mêmes mots."));
-    //l.push_back(shaper.shape(font, "nוַיְהִי כָל-הָאָרֶץ, שָׂפָה אֶחָת, וּדְבָרִים, אֲחָדִים.")); //he
-    //l.push_back(shaper.shape(font, "सारी पृथ्वी पर एक ही भाषा, और एक ही बोली थी।")); // hi
+    l.push_back(shaper.shape(font, "nוַיְהִי כָל-הָאָרֶץ, שָׂפָה אֶחָת, וּדְבָרִים, אֲחָדִים.")); //he
+    l.push_back(shaper.shape(font, "सारी पृथ्वी पर एक ही भाषा, और एक ही बोली थी।")); // hi
     l.push_back(shaper.shape(font, "全地は同じ発音、同じ言葉であった。")); //ja
     l.push_back(shaper.shape(font, "온 땅의 구음이 하나이요 언어가 하나이었더라")); //ko
     l.push_back(shaper.shape(font, "На всей земле был один язык и одно наречие."));
     l.push_back(shaper.shape(font, "那時、天下人的口音言語、都是一樣。")); //zh-tw
+
+    // BIDI
+    l.push_back(shaper.shape(font, "محور 26 يوليو 42 يوليو end"));
+    l.push_back(shaper.shape(font, "start محور 26 يوليو 42 يوليو end"));
+
 }
 
-void onDraw(int width, int height) {
+void onDraw(GLFWwindow *window, int width, int height) {
 
     batch.setClip(0,0, width, height);
     renderer.beginFrame(width, height);
