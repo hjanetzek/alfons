@@ -1,8 +1,5 @@
-add_library (linebreak
-  linebreak/linebreak.c
-  linebreak/linebreakdata.c
-  linebreak/linebreakdef.c)
 
-target_include_directories (linebreak
-  PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/linebreak)
+set(HARFBUZZ_BUILD_ICU ON CACHE BOOL "Enable building of ICU")
+set(HARFBUZZ_BUILD_UCDN ON CACHE BOOL "Enable building of UCDN")
+
+add_subdirectory(hb-icu-ft)
