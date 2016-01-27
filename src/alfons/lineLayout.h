@@ -92,12 +92,10 @@ public:
           m_middleLineFactor(0),
           m_scale(1) {
 
-            for (auto& shape : m_shapes) {
-                if (shape.flags != 0) {
-                    m_advance += shape.advance;
-                }
-            }
+        for (auto& shape : m_shapes) {
+            m_advance += shape.advance;
         }
+    }
 
     std::vector<Shape>& shapes() { return m_shapes; }
     const std::vector<Shape>& shapes() const { return m_shapes; }
