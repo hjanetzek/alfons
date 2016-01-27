@@ -10,6 +10,10 @@
 #include "logger.h"
 #include "demoRenderer.h"
 
+#include "nanovg.h"
+#define NANOVG_GL2_IMPLEMENTATION
+#include "nanovg_gl.h"
+
 #define TEXT_SIZE 20
 #define DEFAULT "NotoSans-Regular.ttf"
 #define FONT_AR "NotoNaskh-Regular.ttf"
@@ -27,6 +31,8 @@ TextBatch batch(atlas, renderer);
 TextShaper shaper;
 std::shared_ptr<Font> font;
 std::vector<LineLayout> l;
+
+NVGcontext* vg = nullptr;
 
 void onSetup(int w, int h) {
 
@@ -56,19 +62,32 @@ void onSetup(int w, int h) {
     l.push_back(shaper.shape(font, "محور 26 يوليو 42 يوليو end"));
     l.push_back(shaper.shape(font, "start محور 26 يوليو 42 يوليو end"));
 
+    vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+
 }
 
 void onDraw(GLFWwindow *window, int width, int height) {
 
+    nvgBeginFrame(vg, width, height, 1);
+    nvgStrokeColor(vg, nvgRGBA(255,255,255,255));
+
     batch.setClip(0,0, width, height);
-    renderer.beginFrame(width, height);
 
     glm::vec2 offset(20, 20);
 
-    for (auto& layout : l) {
-        auto adv = batch.draw(layout, offset, std::max(width - 40, 10));
+    for (auto& line : l) {
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, offset.x, offset.y);
+        nvgLineTo(vg, offset.x + line.advance(), offset.y);
+        nvgStroke(vg);
+
+        auto adv = batch.draw(line, offset, std::max(width - 40, 10));
         offset.y = adv.y;
     }
+
+    nvgEndFrame(vg);
+
+    renderer.beginFrame(width, height);
 
     float inner = 0.1;
     float outer = 0.3;
