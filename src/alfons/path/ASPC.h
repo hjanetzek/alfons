@@ -22,6 +22,7 @@
 
 #include <array>
 #include <functional>
+#include <cstdlib>
 
 namespace alfons {
 
