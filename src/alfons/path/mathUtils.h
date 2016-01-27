@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <math.h>
 
 namespace alfons {
 static const float D2R = M_PI / 180.0;
