@@ -12,7 +12,7 @@
 
 #include <glm/vec2.hpp>
 
-#include "alfons/quad.h"
+#include "alfons/alfons.h"
 
 #if 0
 #include "geom/rect.h"

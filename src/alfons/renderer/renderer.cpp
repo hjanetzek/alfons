@@ -29,7 +29,7 @@ void Renderer::drawGlyph(const Rect& _rect, const AtlasGlyph& _glyph) {
     batches[_glyph.atlas].add(_rect, *_glyph.glyph, m_state);
 }
 
-void Renderer::addTexture(AtlasID atlas, uint32_t textureWidth, uint32_t textureHeight) {
+void Renderer::addTexture(AtlasID atlas, uint16_t textureWidth, uint16_t textureHeight) {
     if (atlas >= batches.size()) {
         batches.resize(atlas+1);
     }
@@ -38,7 +38,8 @@ void Renderer::addTexture(AtlasID atlas, uint32_t textureWidth, uint32_t texture
     batches[atlas].height = textureHeight;
 }
 
-void Renderer::addGlyph(AtlasID atlas, uint gx, uint gy, uint gw, uint gh, const unsigned char* src, uint pad) {
+void Renderer::addGlyph(AtlasID atlas, uint16_t gx, uint16_t gy, uint16_t gw, uint16_t gh,
+                        const unsigned char* src, uint16_t pad) {
 
     // LOGD("addGlyph %d", atlas);
 
@@ -86,8 +87,8 @@ void Renderer::addGlyph(AtlasID atlas, uint gx, uint gy, uint gw, uint gh, const
 
     dirtyRect[0] = std::min(dirtyRect[0], gx);
     dirtyRect[1] = std::min(dirtyRect[1], gy);
-    dirtyRect[2] = std::max(dirtyRect[2], gx + gw);
-    dirtyRect[3] = std::max(dirtyRect[3], gy + gh);
+    dirtyRect[2] = std::max(dirtyRect[2], uint16_t(gx + gw));
+    dirtyRect[3] = std::max(dirtyRect[3], uint16_t(gy + gh));
     batches[atlas].dirty = true;
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "alfons.h"
 #include "glyph.h"
 #include <vector>
 #include <memory>
@@ -68,12 +69,6 @@ struct AtlasGlyph {
 
 class LineLayout;
 class Font;
-
-struct TextureCallback {
-    virtual void addTexture(AtlasID id, uint32_t textureWidth, uint32_t textureHeight) = 0;
-    virtual void addGlyph(AtlasID id, uint gx, uint gy, uint gw, uint gh,
-                          const unsigned char* src, uint padding) = 0;
-};
 
 class GlyphAtlas {
 

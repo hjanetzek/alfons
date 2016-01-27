@@ -1,13 +1,12 @@
 #pragma once
 
-#include "alfons/textRenderer.h"
-#include "alfons/quad.h"
+#include "alfons/alfons.h"
+#include "alfons/atlas.h"
 
 #include <cstdint>
 #include <vector>
 
 #define USE_SDF
-
 
 namespace alfons {
 
@@ -27,8 +26,8 @@ struct Vertex {
 struct QuadBatch {
 
     std::vector<unsigned char> texData;
-    uint32_t width, height;
-    uint32_t dirtyRect[4];
+    uint16_t width, height;
+    uint16_t dirtyRect[4];
     bool dirty;
 
     std::vector<Vertex> vertices;
@@ -88,11 +87,12 @@ public:
 
     void setTextState(uint32_t _state) { m_state = _state; }
 
-    virtual void drawGlyph(const Quad& box, const AtlasGlyph& glyph);
-    virtual void drawGlyph(const Rect& rect, const AtlasGlyph& glyph);
+    void drawGlyph(const Quad& box, const AtlasGlyph& glyph) override;
+    void drawGlyph(const Rect& rect, const AtlasGlyph& glyph) override;
 
-    virtual void addTexture(AtlasID id, uint32_t textureWidth, uint32_t textureHeight);
-    virtual void addGlyph(AtlasID, uint gx, uint gy, uint gw, uint gh, const unsigned char* src, uint padding);
+    void addTexture(AtlasID id, uint16_t textureWidth, uint16_t textureHeight) override;
+    void addGlyph(AtlasID, uint16_t gx, uint16_t gy, uint16_t gw, uint16_t gh,
+                  const unsigned char* src, uint16_t padding) override;
 
     std::vector<QuadBatch> batches;
 

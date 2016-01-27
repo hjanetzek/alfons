@@ -1,3 +1,4 @@
+#if 0
 #include "alfons.h"
 
 namespace alfons {
@@ -9,3 +10,4 @@ Alfons::Alfons()
 }
 
 }
+#endif
