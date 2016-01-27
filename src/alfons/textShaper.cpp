@@ -297,8 +297,8 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
     hb_shape(_face.hbFont(), m_hbBuffer, NULL, 0);
 
     auto glyphCount = hb_buffer_get_length(m_hbBuffer);
-    auto* glyphInfos = hb_buffer_get_glyph_infos(m_hbBuffer, NULL);
-    auto* glyphPositions = hb_buffer_get_glyph_positions(m_hbBuffer, NULL);
+    const auto* glyphInfos = hb_buffer_get_glyph_infos(m_hbBuffer, NULL);
+    const auto* glyphPositions = hb_buffer_get_glyph_positions(m_hbBuffer, NULL);
 
     bool missingGlyphs = false;
 
@@ -335,12 +335,12 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
         float advance = glyphPositions[pos].x_advance * _face.scale().x;
 
         auto bufferPos = clusterId - _run.start;
-        log("add glyph %d/%d pos:%d linebreak:%d", id, clusterId, pos, m_linebreaks[bufferPos]);
+        log("add glyph %d/%d pos:%d linebreak:%d adv:%f",
+            id, clusterId, pos, m_linebreaks[bufferPos], advance);
 
         if (m_glyphAdded[id]) {
             m_glyphAdded[id] = 2;
 
-            LOGI("CLUSTER FOUND! %d", codepoint);
             if (m_clusters.size() < m_shapes.size()) {
                 m_clusters.resize(m_shapes.size());
             }
