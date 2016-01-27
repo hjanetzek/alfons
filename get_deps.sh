@@ -4,3 +4,4 @@
 
 git clone --recursive https://github.com/tangrams/harfbuzz-icu-freetype deps/hb-icu-ft
 git clone https://github.com/g-truc/glm.git deps/glm
+git clone https://github.com/memononen/nanovg deps/nanovg
