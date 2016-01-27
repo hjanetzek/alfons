@@ -69,7 +69,8 @@ void onSetup(int w, int h) {
 void onDraw(GLFWwindow *window, int width, int height) {
 
     nvgBeginFrame(vg, width, height, 1);
-    nvgStrokeColor(vg, nvgRGBA(255,255,255,255));
+    nvgStrokeColor(vg, nvgRGBA(255,255,255,128));
+    nvgFillColor(vg, nvgRGBA(64,64,64,128));
 
     batch.setClip(0,0, width, height);
 
@@ -77,12 +78,23 @@ void onDraw(GLFWwindow *window, int width, int height) {
 
     for (auto& line : l) {
         nvgBeginPath(vg);
+        float asc = line.ascent();
+        float dsc = line.descent();
+        float adv = line.advance();
+
+        nvgMoveTo(vg, offset.x, offset.y - asc);
+        nvgLineTo(vg, offset.x + adv, offset.y - asc);
+        nvgLineTo(vg, offset.x + adv, offset.y + dsc);
+        nvgLineTo(vg, offset.x, offset.y + dsc);
+        nvgFill(vg);
+
+        nvgBeginPath(vg);
         nvgMoveTo(vg, offset.x, offset.y);
         nvgLineTo(vg, offset.x + line.advance(), offset.y);
         nvgStroke(vg);
 
-        auto adv = batch.draw(line, offset, std::max(width - 40, 10));
-        offset.y = adv.y;
+        offset.y = batch.draw(line, offset, std::max(width - 40, 10)).y;
+        offset.y += 10;
     }
 
     nvgEndFrame(vg);
