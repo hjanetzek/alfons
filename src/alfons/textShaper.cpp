@@ -158,7 +158,7 @@ void TextItemizer::itemizeScriptAndLanguage(TextLine& _line) const {
         const char* lang = hb_language_to_string(_line.langHint);
 
         if (lang != nullptr && langHelper.matchLanguage(script, std::string(lang))) {
-            log("script run: %d to %d, lang:%s", start, end, lang);
+            //log("script run: %d to %d, lang:%s", start, end, lang);
 
             _line.scriptLangItems.emplace_back(start, end, std::make_pair(script, _line.langHint));
             continue;
@@ -166,7 +166,7 @@ void TextItemizer::itemizeScriptAndLanguage(TextLine& _line) const {
         }
         auto& language = langHelper.detectLanguage(script);
 
-        log("script run: %d to %d, lang:%s", start, end, language.c_str());
+        //log("script run: %d to %d, lang:%s", start, end, language.c_str());
 
         _line.scriptLangItems.emplace_back(start, end, std::make_pair(script,
                 hb_language_from_string(language.c_str(), -1)));
@@ -223,7 +223,7 @@ void TextItemizer::itemizeDirection(TextLine& _line) {
 
     if (direction != UBIDI_MIXED) {
         _line.directionItems.emplace_back(0, length, icuDirectionToHB(direction));
-        log("dir run: %d to %d - not mixed", 0, length);
+        //log("dir run: %d to %d - not mixed", 0, length);
 
     } else {
         auto count = ubidi_countRuns(bidi, &error);
@@ -235,8 +235,8 @@ void TextItemizer::itemizeDirection(TextLine& _line) {
             _line.directionItems.emplace_back(start, start + length,
                                               icuDirectionToHB(direction));
 
-            log("dir run: %d to %d, rtl:%d", start, start + length,
-                icuDirectionToHB(direction) == HB_DIRECTION_RTL);
+            // log("dir run: %d to %d, rtl:%d", start, start + length,
+            //     icuDirectionToHB(direction) == HB_DIRECTION_RTL);
         }
     }
 }
@@ -253,9 +253,8 @@ void TextItemizer::mergeItems(TextLine& _line) const {
 
         auto scriptIt = findEnclosingRange(_line.scriptLangItems, position);
 
-        log("merge run: %d to %d/%d, rtl:%d", position, scriptIt->end, end,
-            directionIt.data == HB_DIRECTION_RTL);
-
+        // log("merge run: %d to %d/%d, rtl:%d", position, scriptIt->end, end,
+        //     directionIt.data == HB_DIRECTION_RTL);
 
         while (position < end) {
             TextRun run;
@@ -302,7 +301,7 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
 
     bool missingGlyphs = false;
 
-    log("run: %d to %d, rtl:%d", _run.start, _run.end, _run.direction == HB_DIRECTION_RTL);
+    //log("run: %d to %d, rtl:%d", _run.start, _run.end, _run.direction == HB_DIRECTION_RTL);
 
     for (size_t pos = 0; pos < glyphCount; pos++) {
         auto codepoint = glyphInfos[pos].codepoint;
@@ -317,14 +316,14 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
         }
 
         if (codepoint == 0) {
-            log("missing glyphs");
+            //log("missing glyphs");
             missingGlyphs = true;
             continue;
         }
 
         if (m_glyphAdded[id] && m_shapes[id].face != _face.id()) {
             // cluster found, with another font (e.g. 'space')
-            log("skip glyph %d/%d pos:%d", id, clusterId, pos);
+            LOGE("skip glyph %d/%d pos:%d", id, clusterId, pos);
 
             continue;
         }
@@ -335,8 +334,8 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
         float advance = glyphPositions[pos].x_advance * _face.scale().x;
 
         auto bufferPos = clusterId - _run.start;
-        log("add glyph %d/%d pos:%d linebreak:%d adv:%f",
-            id, clusterId, pos, m_linebreaks[bufferPos], advance);
+        // log("add glyph %d/%d pos:%d linebreak:%d adv:%f",
+        //     id, clusterId, pos, m_linebreaks[bufferPos], advance);
 
         if (m_glyphAdded[id]) {
             m_glyphAdded[id] = 2;
@@ -373,6 +372,8 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
         return LineLayout();
     }
 
+    hb_language_t defaultLang = hb_language_get_default();
+
     int numChars = _range.back().end;
 
     std::vector<Shape> shapes;
@@ -402,7 +403,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
 
         const char* lang = nullptr;
         if (run.language == HB_LANGUAGE_INVALID) {
-            hb_buffer_set_language(m_hbBuffer, hb_language_get_default());
+            hb_buffer_set_language(m_hbBuffer, defaultLang);
         } else {
             hb_buffer_set_language(m_hbBuffer, run.language);
             lang = hb_language_to_string(run.language);
@@ -428,7 +429,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
                 setMax(lineMetrics.underlineOffset, metrics.underlineOffset);
                 break;
             }
-            log("missing glyph for lang: %s", hb_language_to_string(run.language));
+            //log("missing glyph for lang: %s", hb_language_to_string(run.language));
 
             // TODO check why the contents must be set again!
             // - check if it is possible to only reset the hb_buffer position
@@ -441,7 +442,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
             hb_buffer_set_script(m_hbBuffer, run.script);
             hb_buffer_set_direction(m_hbBuffer, run.direction);
             if (run.language == HB_LANGUAGE_INVALID) {
-                hb_buffer_set_language(m_hbBuffer, hb_language_get_default());
+                hb_buffer_set_language(m_hbBuffer, defaultLang);
             } else {
                 hb_buffer_set_language(m_hbBuffer, run.language);
             }
@@ -460,8 +461,6 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
             }
         }
     }
-
-    log("font height %f", lineMetrics.height);
 
     return LineLayout(_font, shapes, lineMetrics, _line.overallDirection);
 }
