@@ -49,7 +49,7 @@ std::shared_ptr<Font> FontManager::getFont(const std::string& name,
         if (baseSize == 0) { baseSize = it->second.second; }
 
         std::string& uri = it->second.first;
-        auto font = getCachedFont(InputSource::get(uri),
+        auto font = getCachedFont(InputSource(uri),
                                   Font::Properties(baseSize, prop.style));
 
         // Allowing caching upon further access.
