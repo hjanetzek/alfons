@@ -189,5 +189,11 @@ bool GlyphAtlas::createGlyph(const Font& _font, const GlyphKey& _key, AtlasGlyph
     return true;
 }
 
+void GlyphAtlas::clear(AtlasID _atlasId) {
+    if (_atlasId >= m_atlas.size()) { return; }
+
+    m_atlas[_atlasId].reset(m_textureSize, m_textureSize);
+}
+
 
 }

@@ -82,6 +82,7 @@ public:
 
     bool createGlyph(const Font& font, const GlyphKey& key, AtlasGlyph& entry);
 
+    void clear(AtlasID atlasId);
 private:
     std::vector<Atlas> m_atlas;
 
