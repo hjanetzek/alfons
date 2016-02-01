@@ -36,6 +36,8 @@ void Atlas::reset(int w, int h) {
     // Init root node.
     nodes.clear();
     nodes.push_back({0, 0, w});
+
+    glyphMap.clear();
 }
 
 void Atlas::addSkylineLevel(uint32_t idx, int x, int y, int w, int h) {
@@ -187,6 +189,12 @@ bool GlyphAtlas::createGlyph(const Font& _font, const GlyphKey& _key, AtlasGlyph
     _entry.glyph = &(glyphItem.first->second);
 
     return true;
+}
+
+void GlyphAtlas::clear(AtlasID _atlasId) {
+    if (_atlasId >= m_atlas.size()) { return; }
+
+    m_atlas[_atlasId].reset(m_textureSize, m_textureSize);
 }
 
 
