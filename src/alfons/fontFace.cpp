@@ -89,17 +89,14 @@ bool FontFace::load() {
     // FIXME mutex
 
     FT_Error error;
-#if 0
-    if (descriptor.forceMemoryLoad || !descriptor.source->isFile()) {
-        memoryBuffer = descriptor.source->loadDataSource()->getBuffer();
-        error = FT_New_Memory_Face(_ft->getLib(), (FT_Byte*)memoryBuffer.getData(),
-                                   memoryBuffer.getDataSize(), descriptor.faceIndex, &ftFace);
-    } else
-#endif
-    {
+    if (m_descriptor.source.isUri()) {
         error = FT_New_Face(m_ft.getLib(),
                             m_descriptor.source.uri().c_str(),
                             m_descriptor.faceIndex, &m_ftFace);
+    } else {
+        auto& buffer = m_descriptor.source.buffer();
+        error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte*>(buffer.data()),
+                                   buffer.size(), m_descriptor.faceIndex, &m_ftFace);
     }
 
     if (error) {
@@ -176,11 +173,7 @@ bool FontFace::load() {
 void FontFace::unload() {
     if (m_loaded) {
         m_loaded = false;
-#if 0
-        if (descriptor.forceMemoryLoad) {
-            memoryBuffer.reset();
-        }
-#endif
+
         hb_font_destroy(m_hbFont);
         m_hbFont = nullptr;
 
