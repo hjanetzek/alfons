@@ -36,6 +36,8 @@ void Atlas::reset(int w, int h) {
     // Init root node.
     nodes.clear();
     nodes.push_back({0, 0, w});
+
+    glyphMap.clear();
 }
 
 void Atlas::addSkylineLevel(uint32_t idx, int x, int y, int w, int h) {
