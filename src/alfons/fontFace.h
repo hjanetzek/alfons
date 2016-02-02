@@ -35,14 +35,11 @@ public:
         InputSource source;
         int faceIndex;
         float scale;
-        bool forceMemoryLoad;
 
-        Descriptor(InputSource source, int faceIndex = 0, float scale = 1,
-                   bool forceMemoryLoad = false)
+        Descriptor(InputSource source, int faceIndex = 0, float scale = 1)
             : source(source),
               faceIndex(faceIndex),
-              scale(scale),
-              forceMemoryLoad(forceMemoryLoad) {}
+              scale(scale) {}
 
         bool empty() { return !source; }
     };

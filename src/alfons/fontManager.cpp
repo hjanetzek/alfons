@@ -16,15 +16,36 @@
 
 namespace alfons {
 
-std::shared_ptr<Font> FontManager::addFont(std::string path, float size) {
-    hasDefaultFont = true;
-    defaultFontName = "default";
-    defaultFontStyle = Font::Style::regular;
-    m_globalMap[make_pair(defaultFontName, defaultFontStyle)] = std::make_pair(path, 0);
+const std::string s_defaultFontName = "default";
+
+std::shared_ptr<Font> FontManager::addFontFromMemory(std::string name,
+    unsigned char* blob,
+    size_t dataSize,
+    float size,
+    Font::Style style)
+{
+    InputSource source(blob, dataSize);
+
+    auto descriptor = FontFace::Descriptor(source, 0, 1);
+    auto properties = Font::Properties(size, style);
+
+    return getFont(name, properties);
+}
+
+void FontManager::setFallbackStack(std::vector<std::shared_ptr<Font>> fontfallbacks) {
+    m_fontFallbacks = fontfallbacks;
+}
+
+std::shared_ptr<Font> FontManager::addFont(std::string name,
+    std::string path,
+    float size,
+    Font::Style style)
+{
+    m_globalMap[make_pair(name, style)] = std::make_pair(path, 0);
 
     auto properties = Font::Properties(size, Font::Style::regular);
 
-    return getFont(defaultFontName, properties);
+    return getFont(name, properties);
 }
 
 std::shared_ptr<Font> FontManager::getFont(const std::string& name,
@@ -57,22 +78,22 @@ std::shared_ptr<Font> FontManager::getFont(const std::string& name,
         return font;
     }
 
-    // Basic system for handling undefined font names and styles.
-    if (hasDefaultFont) {
-        if (name != defaultFontName) {
-            auto font = getFont(defaultFontName, prop);
-            m_shortcuts[key] = font;
-            return font;
-        }
-        if (prop.style != defaultFontStyle) {
 
-            auto font = getFont(defaultFontName, {prop.baseSize, defaultFontStyle});
-            m_shortcuts[key] = font;
-            return font;
-        }
-    }
+        // Basic system for handling undefined font names and styles.
+        /*if (m_defaultFont) {
+            if (name != m_defaultFont) {
+                auto font = getFont(defaultFontName, prop);
+                m_shortcuts[key] = font;
+                return font;
+            }
+            if (prop.style != defaultFontStyle) {
 
-    // Does not occur, unless no "Default font" is defined.
+                auto font = getFont(defaultFontName, {prop.baseSize, defaultFontStyle});
+                m_shortcuts[key] = font;
+                return font;
+            }
+        }*/
+
     return nullptr;
 }
 
@@ -88,7 +109,7 @@ std::shared_ptr<Font> FontManager::getCachedFont(InputSource source,
     auto font = std::make_shared<Font>(prop);
     m_fonts[key] = font;
 
-    auto descriptor = FontFace::Descriptor(source, 0, 1, false);
+    auto descriptor = FontFace::Descriptor(source, 0, 1);
 
     font->addFace(getFontFace(descriptor, prop.baseSize));
 

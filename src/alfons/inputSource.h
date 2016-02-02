@@ -18,10 +18,11 @@ class InputSource {
 public:
 
     InputSource(const std::string& _uri) : m_uri(_uri) {}
-    InputSource(std::vector<char> _data) : m_buffer(std::move(_data)) {}
+    InputSource(std::vector<unsigned char> _data) : m_buffer(std::move(_data)) {}
+    InputSource(unsigned char* data, size_t len) : m_buffer(data, data + len) {}
 
     const std::string& uri() const { return m_uri; }
-    const std::vector<char> buffer() const { return m_buffer; }
+    const std::vector<unsigned char> buffer() const { return m_buffer; }
 
     bool isUri() const { return !m_uri.empty(); }
 
@@ -30,6 +31,6 @@ public:
 
 protected:
     std::string m_uri;
-    std::vector<char> m_buffer;
+    std::vector<unsigned char> m_buffer;
 };
 }

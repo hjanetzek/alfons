@@ -21,8 +21,16 @@ public:
 
     ~FontManager() {}
 
-    std::shared_ptr<Font> addFont(std::string path, float baseSize);
+    std::shared_ptr<Font> addFont(std::string name, std::string path, float baseSize,
+                                  Font::Style style = Font::Style::regular);
 
+    std::shared_ptr<Font> addFontFromMemory(std::string name, unsigned char* blob, size_t dataSize,
+                                            float size, Font::Style style = Font::Style::regular);
+
+    // Sets the font fallback stack, ordered by priorities (vector.begin() more important than vector.end())
+    void setFallbackStack(std::vector<std::shared_ptr<Font>> fontfallbacks);
+
+    // Get the font for a given name, returns nullptr if no font for the given name & properties is found
     std::shared_ptr<Font> getFont(const std::string& name,
                                   const Font::Properties& props = Font::Properties(0, Font::Style::regular));
 
@@ -41,9 +49,7 @@ private:
 
     FaceID m_maxFontId = 0;
 
-    bool hasDefaultFont = false;
-    Font::Style defaultFontStyle = Font::Style::regular;
-    std::string defaultFontName;
+    std::vector<std::shared_ptr<Font>> m_fontFallbacks;
 
     // Font face name and style
     using FontFaceKey = std::pair<std::string, Font::Style>;
