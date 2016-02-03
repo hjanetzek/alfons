@@ -3,6 +3,8 @@ add_library (linebreak
   linebreak/linebreakdata.c
   linebreak/linebreakdef.c)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/logger/)
+
 target_include_directories (linebreak
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/linebreak)
@@ -50,7 +52,7 @@ if(ALFONS_BUILD_RENDERER)
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${ALFONS_RENDER_DEPS_INCLUDE_DIRS})
 
-  target_link_libraries (alfons_render 
+  target_link_libraries (alfons_render
     LINK_PUBLIC
     alfons
     ${ALFONS_RENDER_DEPS_LIBRARIES})
