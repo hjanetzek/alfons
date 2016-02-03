@@ -47,14 +47,19 @@ if (BUILD_DEMO)
 
   include(${PLATFORM_TARGET})
 
+  #add_library(nanovg
+  #    nanovg/src/nanovg.c)
+
+  #target_include_directories(nanovg
+  #    PUBLIC
+  #    nanovg/src)
 else()
 
-  # BUILD_LIBRARY
-  #
-  # TODO check that required values are set
-  # - glm include dir
-  # - logger
-  # - harfbuzz,icu,freetyp libs
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps)
+
+  #set(ALFONS_DEPS_INCLUDE_DIRS ${ALFONS_DEPS_INCLUDE_DIRS}
+  #  ${CMAKE_CURRENT_SOURCE_DIR}/alfons/src/logger
+  #  CACHE INTERNAL "alfons-includes" FORCE)
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 endif()
