@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+# include cmake/utils.cmake
+include(utils)
+
 if (BUILD_DEMO)
   set(ALFONS_BUILD_RENDERER 1)
-
-  set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-
   message(STATUS "modules : ${CMAKE_MODULE_PATH}")
-
-  # include cmake/utils.cmake
-  include(utils)
 
   # cmake output configuration
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -45,6 +43,8 @@ if (BUILD_DEMO)
   # setting up cache variable platform
   set(PLATFORM ${varplatform} CACHE INTERNAL "platform" FORCE)
 
+  include(glm)
+
   include(${PLATFORM_TARGET})
 
   #add_library(nanovg
@@ -54,6 +54,7 @@ if (BUILD_DEMO)
   #    PUBLIC
   #    nanovg/src)
 else()
+  include(glm)
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps)
 

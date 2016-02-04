@@ -16,7 +16,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/deps)
 
 set(ALFONS_DEPS_INCLUDE_DIRS
   ${PROJECT_SOURCE_DIR}/deps
-  ${PROJECT_SOURCE_DIR}/deps/glm
   ${PROJECT_SOURCE_DIR}/src/logger
 
   # ${FREETYPE_INCLUDE_DIRS}

@@ -3,8 +3,6 @@ add_library (linebreak
   linebreak/linebreakdata.c
   linebreak/linebreakdef.c)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/logger/)
-
 target_include_directories (linebreak
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/linebreak)
@@ -28,12 +26,18 @@ add_library (alfons
 target_include_directories (alfons
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${ALFONS_DEPS_INCLUDE_DIRS})
+  ${ALFONS_DEPS_INCLUDE_DIRS}
+  ${GLM_INCLUDE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/logger)
 
 target_link_libraries (alfons
   LINK_PUBLIC
   linebreak
   ${ALFONS_DEPS_LIBRARIES})
+
+if (USE_OWN_GLM)
+add_dependencies(alfons glm)
+endif()
 
 ### check for undefined symbols
 if(BUILD_SHARED_LIBS AND CMAKE_COMPILER_IS_GNUCXX)
