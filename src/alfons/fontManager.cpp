@@ -29,7 +29,10 @@ std::shared_ptr<Font> FontManager::addFontFromMemory(std::string name,
     auto descriptor = FontFace::Descriptor(source, 0, 1);
     auto properties = Font::Properties(size, style);
 
-    return getFont(name, properties);
+    auto font = getFont(name, properties);
+    font->addFace(getFontFace(descriptor, size));
+
+    return font;
 }
 
 void FontManager::setFallbackStack(std::vector<std::shared_ptr<Font>> fontfallbacks) {
