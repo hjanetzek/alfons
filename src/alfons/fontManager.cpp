@@ -16,34 +16,45 @@
 
 namespace alfons {
 
-const std::string s_defaultFontName = "default";
+std::shared_ptr<Font> FontManager::addFont(std::string _name, InputSource _source,
+                                           Font::Properties _properties) {
 
-std::shared_ptr<Font> FontManager::addFontFromMemory(std::string name,
-    unsigned char* blob,
-    size_t dataSize,
-    float size,
-    Font::Style style)
-{
-    InputSource source(blob, dataSize);
+    auto key = make_pair(_name, _properties);
+    auto it = m_fonts.find(key);
 
-    auto descriptor = FontFace::Descriptor(source, 0, 1);
-    auto properties = Font::Properties(size, style);
+    if (it != m_fonts.end()) {
+        return it->second;
+        //return nullptr;
+    }
 
-    auto font = getFont(name, properties);
-    font->addFace(getFontFace(descriptor, size));
+    auto font = std::make_shared<Font>(_properties);
+    m_fonts.emplace(std::move(key), font);
+
+    auto descriptor = FontFace::Descriptor(_source, 0, 1);
+    font->addFace(addFontFace(descriptor, _properties.baseSize));
 
     return font;
 }
 
-void FontManager::setFallbackStack(std::vector<std::shared_ptr<Font>> fontfallbacks) {
-    m_fontFallbacks = fontfallbacks;
+std::shared_ptr<Font> FontManager::getFont(std::string _name, Font::Properties _properties) {
+
+    auto key = make_pair(_name, _properties);
+    auto it = m_fonts.find(key);
+
+    if (it != m_fonts.end()) {
+        return it->second;
+    }
+
+    auto font = std::make_shared<Font>(_properties);
+    m_fonts.emplace(std::move(key), font);
+
+    return font;
 }
 
-std::shared_ptr<Font> FontManager::addFont(std::string name,
-    std::string path,
-    float size,
-    Font::Style style)
-{
+#if 0
+std::shared_ptr<Font> FontManager::addFont(std::string name, std::string path,
+                                           float size, Font::Style style) {
+
     m_globalMap[make_pair(name, style)] = std::make_pair(path, 0);
 
     auto properties = Font::Properties(size, Font::Style::regular);
@@ -110,7 +121,8 @@ std::shared_ptr<Font> FontManager::getCachedFont(InputSource source,
     log("getCachedFont: %s", source.uri());
 
     auto font = std::make_shared<Font>(prop);
-    m_fonts[key] = font;
+
+    m_fonts.emplace(std::move(key), font);
 
     auto descriptor = FontFace::Descriptor(source, 0, 1);
 
@@ -118,6 +130,7 @@ std::shared_ptr<Font> FontManager::getCachedFont(InputSource source,
 
     return font;
 }
+#endif
 
 void FontManager::unload(Font& font) {
 
@@ -153,7 +166,8 @@ void FontManager::unload() {
     }
 }
 
-std::shared_ptr<FontFace> FontManager::getFontFace(const FontFace::Descriptor& descriptor, float baseSize) {
+std::shared_ptr<FontFace> FontManager::addFontFace(const FontFace::Descriptor& descriptor,
+                                                   float baseSize) {
 
     // FontFace::Key key(descriptor, baseSize);
     // for (const auto& face : faces) {
@@ -169,8 +183,5 @@ std::shared_ptr<FontFace> FontManager::getFontFace(const FontFace::Descriptor& d
 
     return face;
 }
-
-
-
 
 }

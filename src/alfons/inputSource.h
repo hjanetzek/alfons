@@ -11,18 +11,24 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 namespace alfons {
 
 class InputSource {
 public:
 
-    InputSource(const std::string& _uri) : m_uri(_uri) {}
-    InputSource(std::vector<unsigned char> _data) : m_buffer(std::move(_data)) {}
-    InputSource(unsigned char* data, size_t len) : m_buffer(data, data + len) {}
+    InputSource(const std::string& _uri)
+        : m_uri(_uri) {}
+
+    InputSource(std::vector<char> _data)
+        : m_buffer(std::make_shared<std::vector<char>>(std::move(_data))) {}
+
+    InputSource(const char* data, size_t len)
+        : m_buffer(std::make_shared<std::vector<char>>(data, data + len)) {}
 
     const std::string& uri() const { return m_uri; }
-    const std::vector<unsigned char> buffer() const { return m_buffer; }
+    const auto buffer() const { return m_buffer; }
 
     bool isUri() const { return !m_uri.empty(); }
 
@@ -31,6 +37,6 @@ public:
 
 protected:
     std::string m_uri;
-    std::vector<unsigned char> m_buffer;
+    std::shared_ptr<std::vector<char>> m_buffer;
 };
 }

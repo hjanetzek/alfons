@@ -56,7 +56,7 @@ static inline float fastSqrt(float x) {
     return r * x;
 }
 
-static int nextPowerOfTwo(int x) {
+int nextPowerOfTwo(int x) {
     int result = 1;
 
     while (result < x) {
@@ -66,26 +66,26 @@ static int nextPowerOfTwo(int x) {
     return result;
 }
 
-static bool isPowerOfTwo(int x) { return (x > 0) && !(x & (x - 1)); }
+bool isPowerOfTwo(int x) { return (x > 0) && !(x & (x - 1)); }
 
 /*
  * Reference for the 4 following functions:
  * http://stackoverflow.com/a/253874/50335
  */
 
-static bool approximatelyEqual(float a, float b, float epsilon) {
+bool approximatelyEqual(float a, float b, float epsilon) {
     return fabsf(a - b) <= ((fabsf(a) < fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
-static bool essentiallyEqual(float a, float b, float epsilon) {
+bool essentiallyEqual(float a, float b, float epsilon) {
     return fabsf(a - b) <= ((fabsf(a) > fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
-static bool definitelyGreaterThan(float a, float b, float epsilon) {
+bool definitelyGreaterThan(float a, float b, float epsilon) {
     return (a - b) > ((fabsf(a) < fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
-static bool definitelyLessThan(float a, float b, float epsilon) {
+bool definitelyLessThan(float a, float b, float epsilon) {
     return (b - a) > ((fabsf(a) < fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
