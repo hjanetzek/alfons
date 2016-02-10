@@ -35,7 +35,7 @@ public:
         float baseSize;
         Style style;
 
-        Properties(float _baseSize = 0, Style _style = Style::regular)
+        Properties(float _baseSize, Style _style = Style::regular)
             : baseSize(_baseSize), style(_style) {}
 
         bool operator<(const Properties& rhs) const {
@@ -53,7 +53,21 @@ public:
 
     const Faces& getFontSet(hb_language_t lang) const;
 
-    const FontFace& face(int id) const { return *m_faces[id]; };
+    const FontFace& face(FaceID _faceId) const {
+        for (size_t id = 0; id < m_faces.size(); id++) {
+            if (m_faces[id]->id() == _faceId) { return *m_faces[id]; }
+        }
+        assert(false);
+        return *m_faces[0];
+    };
+
+    auto& faces() const { return m_faces; };
+
+    bool hasFaces() const { return !m_faces.empty(); };
+
+    int maxFaceId() const { return m_faces.size()-1; };
+
+    void addFaces(const Font& _other);
 
     const std::map<hb_language_t, Faces>& fontFaceMap() { return m_fontFaceMap; }
 

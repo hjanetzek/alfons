@@ -46,6 +46,10 @@ auto Font::getFontSet(hb_language_t lang) const -> const Faces& {
     return it->second;
 }
 
+void Font::addFaces(const Font& _other) {
+    m_faces.insert(m_faces.end(), _other.m_faces.begin(), _other.m_faces.end());
+}
+
 auto Font::styleStringToEnum(const std::string& style) -> Font::Style {
     if (style == "bold")
         return Font::Style::bold;
