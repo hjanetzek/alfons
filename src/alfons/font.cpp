@@ -13,7 +13,8 @@
 
 namespace alfons {
 
-Font::Font(const Properties& properties) : m_properties(properties) {}
+Font::Font(const Properties& properties)
+    : m_properties(properties) {}
 
 auto Font::addFace(std::shared_ptr<FontFace> _face, hb_language_t _lang) -> bool {
 

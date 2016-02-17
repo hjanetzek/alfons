@@ -45,7 +45,8 @@ public:
 
     Font(const Properties& properties);
 
-    float getSize() const { return m_size; }
+    float size() const { return m_properties.baseSize; }
+
     bool addFace(std::shared_ptr<FontFace> face, hb_language_t lang = HB_LANGUAGE_INVALID);
 
     static Style styleStringToEnum(const std::string& style);
@@ -72,8 +73,6 @@ public:
     const std::map<hb_language_t, Faces>& fontFaceMap() { return m_fontFaceMap; }
 
 protected:
-    float m_size;
-
     Properties m_properties;
 
     Faces m_faces;
