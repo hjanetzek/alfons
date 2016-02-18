@@ -42,8 +42,6 @@ class Atlas {
 public:
     Atlas(int w, int h);
 
-    ~Atlas();
-
     bool addRect(int rw, int rh, int* rx, int* ry);
 
     void expand(int w, int h);
@@ -73,8 +71,9 @@ class Font;
 class GlyphAtlas {
 
 public:
-    GlyphAtlas(TextureCallback& _textureCb, uint16_t _textureSize = 512)
+    GlyphAtlas(TextureCallback& _textureCb, uint16_t _textureSize = 512, int _glyphPadding = 1)
         : m_textureSize(_textureSize),
+          m_padding(_glyphPadding),
           m_textureCb(_textureCb) {}
 
     bool prepare(LineLayout& lineLayout);
@@ -87,6 +86,7 @@ private:
     std::vector<Atlas> m_atlas;
 
     int m_textureSize;
+    int m_padding;
 
     TextureCallback& m_textureCb;
 
