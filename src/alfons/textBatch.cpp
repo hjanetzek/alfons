@@ -84,10 +84,7 @@ glm::vec4 TextBatch::drawShape(const Font& _font, const Shape& _shape,
 
     m_mesh.drawGlyph(rect, atlasGlyph);
 
-    return glm::vec4(atlasGlyph.glyph->u1,
-        atlasGlyph.glyph->u2,
-        atlasGlyph.glyph->v1,
-        atlasGlyph.glyph->v2);
+    return glm::vec4(rect.x1, rect.y1, rect.x2, rect.y2);
 }
 
 glm::vec4 TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
@@ -130,7 +127,7 @@ LineDesc TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
                 glm::vec4 aabb = drawShape(_line.font(), c, _lineDesc.offset, _line.scale());
-                LOGI("AABB: %f %f %f %f", aabb.x, aabb.y, aabb.z, aabb.w);
+                _lineDesc.aabb = aabbMerge(_lineDesc.aabb, aabb);
             }
 
             _lineDesc.offset.x += _line.advance(c);
@@ -145,7 +142,7 @@ LineDesc TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
                 glm::vec4 aabb = drawShape(_line.font(), c, _lineDesc.offset + _line.offsets[i++], _line.scale());
-                LOGI("AABB: %f %f %f %f", aabb.x, aabb.y, aabb.z, aabb.w);
+                _lineDesc.aabb = aabbMerge(_lineDesc.aabb, aabb);
             }
         }
     }
