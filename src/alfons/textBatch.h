@@ -26,14 +26,14 @@ struct MeshCallback;
 struct AtlasGlyph;
 class GlyphAtlas;
 
-struct LineDesc {
+// Declared as a struct for possible other informations about the line
+struct LineMetrics {
     glm::vec4 aabb = {
         std::numeric_limits<float>::max(),
         std::numeric_limits<float>::max(),
         std::numeric_limits<float>::min(),
         std::numeric_limits<float>::min()
     };
-    glm::vec2 offset = glm::vec2(0.f);
 };
 
 class TextBatch {
@@ -58,17 +58,15 @@ public:
     glm::vec4 drawShape(const Font& font, const Shape& shape, const glm::vec2& position,
                    float sizeRatio);
 
-    LineDesc draw(const LineLayout& line, LineDesc lineDesc);
+    glm::vec2 draw(const LineLayout& line, glm::vec2 position, LineMetrics& metrics);
 
-    LineDesc draw(const LineLayout& line, float x, float y) {
-        LineDesc desc;
-        desc.offset = {x, y};
-        return draw(line, desc);
+    glm::vec2 draw(const LineLayout& line, float x, float y, LineMetrics& metrics) {
+        return draw(line, {x, y}, metrics);
     }
 
-    LineDesc draw(const LineLayout& line, LineDesc lineDesc, float width);
+    glm::vec2 draw(const LineLayout& line, glm::vec2 position, float width, LineMetrics& metrics);
 
-    LineDesc draw(const LineLayout& line, size_t start, size_t end, LineDesc lineDesc);
+    glm::vec2 draw(const LineLayout& line, size_t start, size_t end, glm::vec2 position, LineMetrics& metrics);
 
     float draw(const LineLayout& line, const LineSampler& path,
                float offsetX = 0, float offsetY = 0);
