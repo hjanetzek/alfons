@@ -18,12 +18,23 @@
 #include <set>
 #include <map>
 #include <memory>
+#include <limits>
 
 namespace alfons {
 
 struct MeshCallback;
 struct AtlasGlyph;
 class GlyphAtlas;
+
+struct LineDesc {
+    glm::vec4 aabb = {
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::min(),
+        std::numeric_limits<float>::min()
+    };
+    glm::vec2 offset = glm::vec2(0.f);
+};
 
 class TextBatch {
 public:
@@ -35,28 +46,29 @@ public:
     void clearClip() { m_hasClip = false; }
 
     /* Use current QuadMatrix for transform */
-    void drawTransformedShape(const Font& font, const Shape& shape, const glm::vec2& position,
+    glm::vec4 drawTransformedShape(const Font& font, const Shape& shape, const glm::vec2& position,
                               float sizeRatio);
 
     /* Use current QuadMatrix for transform */
-    inline void drawTransformedShape(const Font& font, const Shape& shape, float x, float y,
+    inline glm::vec4 drawTransformedShape(const Font& font, const Shape& shape, float x, float y,
                                       float sizeRatio) {
-        drawTransformedShape(font, shape, glm::vec2(x, y), sizeRatio);
+        return drawTransformedShape(font, shape, glm::vec2(x, y), sizeRatio);
     }
 
-    void drawShape(const Font& font, const Shape& shape, const glm::vec2& position,
+    glm::vec4 drawShape(const Font& font, const Shape& shape, const glm::vec2& position,
                    float sizeRatio);
 
-    glm::vec2 draw(const LineLayout& line, glm::vec2 offset);
+    LineDesc draw(const LineLayout& line, LineDesc lineDesc);
 
-    glm::vec2 draw(const LineLayout& line, float x, float y) {
-        glm::vec2 offset = {x, y};
-        return draw(line, offset);
+    LineDesc draw(const LineLayout& line, float x, float y) {
+        LineDesc desc;
+        desc.offset = {x, y};
+        return draw(line, desc);
     }
 
-    glm::vec2 draw(const LineLayout& line, glm::vec2 offset, float width);
+    LineDesc draw(const LineLayout& line, LineDesc lineDesc, float width);
 
-    glm::vec2 draw(const LineLayout& line, size_t start, size_t end, glm::vec2 offset);
+    LineDesc draw(const LineLayout& line, size_t start, size_t end, LineDesc lineDesc);
 
     float draw(const LineLayout& line, const LineSampler& path,
                float offsetX = 0, float offsetY = 0);
