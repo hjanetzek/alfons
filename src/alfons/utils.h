@@ -12,6 +12,8 @@
 
 #include <set>
 #include <vector>
+#include <algorithm>
+#include <glm/vec4.hpp>
 
 namespace alfons {
 
@@ -73,4 +75,17 @@ template <typename T>
 Iterator<T> DirectionalRange(T& container, bool reverse = false) {
     return Iterator<T>(container, reverse);
 }
+
+static glm::vec4 aabbMerge(glm::vec4 aabb1, glm::vec4 aabb2) {
+    glm::vec4 aabb;
+
+    aabb.x = std::min(aabb1.x, aabb2.x);
+    aabb.y = std::min(aabb1.y, aabb2.y);
+
+    aabb.z = std::max(aabb1.z, aabb2.z);
+    aabb.w = std::max(aabb1.w, aabb2.w);
+
+    return aabb;
+}
+
 }
