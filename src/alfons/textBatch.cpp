@@ -68,28 +68,33 @@ void TextBatch::setupRect(const Shape& _shape, const glm::vec2& _position,
     _rect.y2 = ul.y + _atlasGlyph.glyph->size.y * _sizeRatio;
 }
 
-void TextBatch::drawShape(const Font& _font, const Shape& _shape,
+glm::vec4 TextBatch::drawShape(const Font& _font, const Shape& _shape,
                           const glm::vec2& _position, float _sizeRatio) {
     AtlasGlyph atlasGlyph;
     if (!m_atlas.getGlyph(_font, {_shape.face, _shape.codepoint}, atlasGlyph)) {
-        return;
+        return glm::vec4();
     }
 
     Rect rect;
     setupRect(_shape, _position, _sizeRatio, rect, atlasGlyph);
 
     if (m_hasClip && clip(rect)) {
-        return;
+        return glm::vec4();
     }
 
     m_mesh.drawGlyph(rect, atlasGlyph);
+
+    return glm::vec4(atlasGlyph.glyph->u1,
+        atlasGlyph.glyph->u2,
+        atlasGlyph.glyph->v1,
+        atlasGlyph.glyph->v2);
 }
 
-void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
+glm::vec4 TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
                                      const glm::vec2& _position, float _sizeRatio) {
     AtlasGlyph atlasGlyph;
     if (!m_atlas.getGlyph(_font, {_shape.face, _shape.codepoint}, atlasGlyph)) {
-        return;
+        return glm::vec4();
     }
 
     Rect rect;
@@ -99,32 +104,39 @@ void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
     m_matrix.transformRect(rect, quad);
 
     if (m_hasClip && clip(quad)) {
-        return;
+        return glm::vec4();
     }
 
     m_mesh.drawGlyph(quad, atlasGlyph);
+
+    // FIXME: account for matrix transform
+    return glm::vec4(atlasGlyph.glyph->u1,
+        atlasGlyph.glyph->u2,
+        atlasGlyph.glyph->v1,
+        atlasGlyph.glyph->v2);
 }
 
-glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _offset) {
-    return draw(_line, 0, _line.shapes().size(), _offset);
+LineDesc TextBatch::draw(const LineLayout& _line, LineDesc _lineDesc) {
+    return draw(_line, 0, _line.shapes().size(), _lineDesc);
 }
 
-glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
-                          glm::vec2 _offset) {
+LineDesc TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
+                          LineDesc _lineDesc) {
 
     if (_line.offsets.empty()) {
-        float startX = _offset.x;
+        float startX = _lineDesc.offset.x;
 
         for (size_t j = _start; j < _end; j++) {
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
-                drawShape(_line.font(), c, _offset, _line.scale());
+                glm::vec4 aabb = drawShape(_line.font(), c, _lineDesc.offset, _line.scale());
+                LOGI("AABB: %f %f %f %f", aabb.x, aabb.y, aabb.z, aabb.w);
             }
 
-            _offset.x += _line.advance(c);
+            _lineDesc.offset.x += _line.advance(c);
             if (c.mustBreak) {
-                _offset.x = startX;
-                _offset.y += _line.height();
+                _lineDesc.offset.x = startX;
+                _lineDesc.offset.y += _line.height();
             }
         }
     } else {
@@ -132,35 +144,39 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
         for (size_t j = _start; j < _end; j++) {
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
-                drawShape(_line.font(), c, _offset + _line.offsets[i++], _line.scale());
+                glm::vec4 aabb = drawShape(_line.font(), c, _lineDesc.offset + _line.offsets[i++], _line.scale());
+                LOGI("AABB: %f %f %f %f", aabb.x, aabb.y, aabb.z, aabb.w);
             }
         }
     }
-    _offset.y += _line.height();
 
-    return _offset;
+    _lineDesc.offset.y += _line.height();
+
+    return _lineDesc;
 }
 
-glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _offset, float _width) {
+LineDesc TextBatch::draw(const LineLayout& _line, LineDesc _lineDesc, float _width) {
 
     float lineWidth = 0;
     int wordLength = 0;
     int wordStart = 0;
-    float startX = _offset.x;
+    float startX = _lineDesc.offset.x;
 
     float adv = 0;
+
+    LineDesc lineDesc;
 
     for (auto& c : _line.shapes()) {
         wordLength++;
 
         // is break - or must break?
         if (c.canBreak || c.mustBreak) {
-            _offset.x = draw(_line, wordStart, wordStart + wordLength, _offset).x;
-            adv = std::max(adv, _offset.x);
+            _lineDesc.offset.x = draw(_line, wordStart, wordStart + wordLength, _lineDesc).offset.x;
+            adv = std::max(adv, _lineDesc.offset.x);
 
             wordStart += wordLength;
             wordLength = 0;
-            lineWidth = _offset.x - startX;
+            lineWidth = _lineDesc.offset.x - startX;
 
         } else {
             lineWidth += _line.advance(c);
@@ -168,19 +184,19 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _offset, float _wid
 
         if (lineWidth > _width) {
             // only go to next line if chars have been added on the current line
-            if (_offset.x > startX) {
-                _offset.y += _line.height();
-                _offset.x = startX;
+            if (_lineDesc.offset.x > startX) {
+                _lineDesc.offset.y += _line.height();
+                _lineDesc.offset.x = startX;
                 lineWidth = 0;
             }
         }
     }
     if (wordLength > 0) {
-        adv = std::max(adv, draw(_line, wordStart, wordStart + wordLength, _offset).x);
+        adv = std::max(adv, draw(_line, wordStart, wordStart + wordLength, _lineDesc).offset.x);
     }
-    _offset.y += _line.height();
-    _offset.x = adv;
-    return _offset;
+    _lineDesc.offset.y += _line.height();
+    _lineDesc.offset.x = adv;
+    return _lineDesc;
 }
 
 float TextBatch::draw(const LineLayout& _line, const LineSampler& _path,
