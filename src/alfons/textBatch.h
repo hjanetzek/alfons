@@ -34,6 +34,20 @@ struct LineMetrics {
         std::numeric_limits<float>::min(),
         std::numeric_limits<float>::min()
     };
+    float height() {
+        if (aabb[1] != std::numeric_limits<float>::max()) {
+            return aabb[3] - aabb[1];
+        }
+        // Not initialized
+        return 0;
+    }
+
+    void addExtents(glm::vec4 other) {
+        aabb.x = std::min(aabb.x, other.x);
+        aabb.y = std::min(aabb.y, other.y);
+        aabb.z = std::max(aabb.z, other.z);
+        aabb.w = std::max(aabb.w, other.w);
+    }
 };
 
 class TextBatch {

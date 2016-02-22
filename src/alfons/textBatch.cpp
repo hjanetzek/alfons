@@ -127,7 +127,7 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
                 glm::vec4 aabb = drawShape(_line.font(), c, _position, _line.scale());
-                _metrics.aabb = aabbMerge(_metrics.aabb, aabb);
+                _metrics.addExtents(aabb);
             }
 
             _position.x += _line.advance(c);
@@ -142,7 +142,7 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
                 glm::vec4 aabb = drawShape(_line.font(), c, _position + _line.offsets[i++], _line.scale());
-                _metrics.aabb = aabbMerge(_metrics.aabb, aabb);
+                _metrics.addExtents(aabb);
             }
         }
     }
