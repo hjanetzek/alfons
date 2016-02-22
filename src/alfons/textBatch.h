@@ -50,6 +50,8 @@ struct LineMetrics {
     }
 };
 
+extern LineMetrics NO_METRICS;
+
 class TextBatch {
 public:
     TextBatch(GlyphAtlas& _atlas, MeshCallback& _mesh);
@@ -60,17 +62,17 @@ public:
     void clearClip() { m_hasClip = false; }
 
     /* Use current QuadMatrix for transform */
-    glm::vec4 drawTransformedShape(const Font& font, const Shape& shape, const glm::vec2& position,
-                              float sizeRatio);
+    void drawTransformedShape(const Font& font, const Shape& shape, const glm::vec2& position,
+                              float scale, LineMetrics& metrics = NO_METRICS);
 
     /* Use current QuadMatrix for transform */
-    inline glm::vec4 drawTransformedShape(const Font& font, const Shape& shape, float x, float y,
-                                      float sizeRatio) {
-        return drawTransformedShape(font, shape, glm::vec2(x, y), sizeRatio);
+    inline void drawTransformedShape(const Font& font, const Shape& shape, float x, float y,
+                                     float scale, LineMetrics& metrics = NO_METRICS) {
+        drawTransformedShape(font, shape, glm::vec2(x, y), scale, metrics);
     }
 
-    glm::vec4 drawShape(const Font& font, const Shape& shape, const glm::vec2& position,
-                   float sizeRatio);
+    void drawShape(const Font& font, const Shape& shape, const glm::vec2& position,
+                   float scale, LineMetrics& metrics = NO_METRICS);
 
     glm::vec2 draw(const LineLayout& line, glm::vec2 position, LineMetrics& metrics);
 
@@ -78,9 +80,11 @@ public:
         return draw(line, {x, y}, metrics);
     }
 
-    glm::vec2 draw(const LineLayout& line, glm::vec2 position, float width, LineMetrics& metrics);
+    glm::vec2 draw(const LineLayout& line, glm::vec2 position, float width,
+                   LineMetrics& metrics);
 
-    glm::vec2 draw(const LineLayout& line, size_t start, size_t end, glm::vec2 position, LineMetrics& metrics);
+    glm::vec2 draw(const LineLayout& line, size_t start, size_t end, glm::vec2 position,
+                   LineMetrics& metrics);
 
     float draw(const LineLayout& line, const LineSampler& path,
                float offsetX = 0, float offsetY = 0);

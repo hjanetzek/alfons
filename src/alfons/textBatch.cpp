@@ -20,6 +20,8 @@
 
 namespace alfons {
 
+LineMetrics NO_METRICS;
+
 TextBatch::TextBatch(GlyphAtlas& _atlas, MeshCallback& _mesh)
     : m_atlas(_atlas), m_mesh(_mesh) {}
 
@@ -68,49 +70,54 @@ void TextBatch::setupRect(const Shape& _shape, const glm::vec2& _position,
     _rect.y2 = ul.y + _atlasGlyph.glyph->size.y * _sizeRatio;
 }
 
-glm::vec4 TextBatch::drawShape(const Font& _font, const Shape& _shape,
-                          const glm::vec2& _position, float _sizeRatio) {
+void TextBatch::drawShape(const Font& _font, const Shape& _shape,
+                          const glm::vec2& _position, float _scale,
+                          LineMetrics& _metrics) {
+
     AtlasGlyph atlasGlyph;
     if (!m_atlas.getGlyph(_font, {_shape.face, _shape.codepoint}, atlasGlyph)) {
-        return glm::vec4();
+        return;
     }
 
     Rect rect;
-    setupRect(_shape, _position, _sizeRatio, rect, atlasGlyph);
+    setupRect(_shape, _position, _scale, rect, atlasGlyph);
 
     if (m_hasClip && clip(rect)) {
-        return glm::vec4();
+        return;
     }
 
     m_mesh.drawGlyph(rect, atlasGlyph);
 
-    return glm::vec4(rect.x1, rect.y1, rect.x2, rect.y2);
+    if (&_metrics != &NO_METRICS) {
+        _metrics.addExtents({rect.x1, rect.y1, rect.x2, rect.y2});
+    }
 }
 
-glm::vec4 TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
-                                     const glm::vec2& _position, float _sizeRatio) {
+void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
+                                     const glm::vec2& _position, float _scale,
+                                     LineMetrics& _metrics) {
     AtlasGlyph atlasGlyph;
     if (!m_atlas.getGlyph(_font, {_shape.face, _shape.codepoint}, atlasGlyph)) {
-        return glm::vec4();
+        return;
     }
 
     Rect rect;
-    setupRect(_shape, _position, _sizeRatio, rect, atlasGlyph);
+    setupRect(_shape, _position, _scale, rect, atlasGlyph);
 
     Quad quad;
     m_matrix.transformRect(rect, quad);
 
     if (m_hasClip && clip(quad)) {
-        return glm::vec4();
+        return;
     }
 
     m_mesh.drawGlyph(quad, atlasGlyph);
 
     // FIXME: account for matrix transform
-    return glm::vec4(atlasGlyph.glyph->u1,
-        atlasGlyph.glyph->u2,
-        atlasGlyph.glyph->v1,
-        atlasGlyph.glyph->v2);
+    // return glm::vec4(atlasGlyph.glyph->u1,
+    //     atlasGlyph.glyph->u2,
+    //     atlasGlyph.glyph->v1,
+    //     atlasGlyph.glyph->v2);
 }
 
 glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _position, LineMetrics& _metrics) {
@@ -126,8 +133,7 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
         for (size_t j = _start; j < _end; j++) {
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
-                glm::vec4 aabb = drawShape(_line.font(), c, _position, _line.scale());
-                _metrics.addExtents(aabb);
+                drawShape(_line.font(), c, _position, _line.scale(), _metrics);
             }
 
             _position.x += _line.advance(c);
@@ -141,8 +147,7 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
         for (size_t j = _start; j < _end; j++) {
             auto& c = _line.shapes()[j];
             if (!c.isSpace) {
-                glm::vec4 aabb = drawShape(_line.font(), c, _position + _line.offsets[i++], _line.scale());
-                _metrics.addExtents(aabb);
+                drawShape(_line.font(), c, _position + _line.offsets[i++], _line.scale(), _metrics);
             }
         }
     }
