@@ -1,4 +1,5 @@
-if (NOT ${GLM_INCLUDE_DIR})
+if (NOT DEFINED ${GLM_INCLUDE_DIR})
+  message(STATUS "Looking for GLM")
 
   find_path(GLM_INCLUDE_DIR glm/glm.hpp
     HINTS
@@ -9,13 +10,13 @@ if (NOT ${GLM_INCLUDE_DIR})
 
 
   if(${GLM_INCLUDE_DIR} STREQUAL "GLM_INCLUDE_DIR-NOTFOUND")
+    message(STATUS "Checkout GLM")
 
     include(ExternalProject)
 
     ExternalProject_Add(glm
-      # get 0.9.7
       GIT_REPOSITORY https://github.com/g-truc/glm.git
-      GIT_TAG eb4a198
+      GIT_TAG 6e5f42b
 
       # put checkout into build-dir/glm
       PREFIX ${PROJECT_SOURCE_DIR}/deps/glm

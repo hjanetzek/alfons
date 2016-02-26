@@ -37,10 +37,10 @@ double prevt = 0;
 
 void onSetup(int w, int h) {
 
-    font = fontMan.addFont(DEFAULT, TEXT_SIZE);
-    font->addFace(fontMan.getFontFace(InputSource(FONT_AR), TEXT_SIZE));
-    font->addFace(fontMan.getFontFace(InputSource(FONT_JA), TEXT_SIZE));
-    font->addFace(fontMan.getFontFace(InputSource(FALLBACK), TEXT_SIZE));
+    font = fontMan.addFont("default", InputSource(DEFAULT), TEXT_SIZE);
+    font->addFace(fontMan.addFontFace(InputSource(FONT_AR), TEXT_SIZE));
+    font->addFace(fontMan.addFontFace(InputSource(FONT_JA), TEXT_SIZE));
+    font->addFace(fontMan.addFontFace(InputSource(FALLBACK), TEXT_SIZE));
 
     layout = shaper.shape(font, "محور 26 يوليو 26 يوليو");
 

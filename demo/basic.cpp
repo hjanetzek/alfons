@@ -10,9 +10,13 @@
 #include "logger.h"
 #include "demoRenderer.h"
 
+#if 0
 #include "nanovg.h"
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
+NVGcontext* vg = nullptr;
+
+#endif
 
 #define TEXT_SIZE 20
 #define DEFAULT "NotoSans-Regular.ttf"
@@ -32,18 +36,16 @@ TextShaper shaper;
 std::shared_ptr<Font> font;
 std::vector<LineLayout> l;
 
-NVGcontext* vg = nullptr;
-
 void onSetup(int w, int h) {
 
     renderer.init();
 
-    font = fontMan.addFont(DEFAULT, TEXT_SIZE);
-    font->addFace(fontMan.getFontFace(InputSource(FONT_AR), TEXT_SIZE));
-    font->addFace(fontMan.getFontFace(InputSource(FONT_HE), TEXT_SIZE));
-    font->addFace(fontMan.getFontFace(InputSource(FONT_HI), TEXT_SIZE));
-    font->addFace(fontMan.getFontFace(InputSource(FONT_JA), TEXT_SIZE));
-    font->addFace(fontMan.getFontFace(InputSource(FALLBACK), TEXT_SIZE));
+    font = fontMan.addFont("default", InputSource(DEFAULT), TEXT_SIZE);
+    font->addFace(fontMan.addFontFace(InputSource(FONT_AR), TEXT_SIZE));
+    font->addFace(fontMan.addFontFace(InputSource(FONT_HE), TEXT_SIZE));
+    font->addFace(fontMan.addFontFace(InputSource(FONT_HI), TEXT_SIZE));
+    font->addFace(fontMan.addFontFace(InputSource(FONT_JA), TEXT_SIZE));
+    font->addFace(fontMan.addFontFace(InputSource(FALLBACK), TEXT_SIZE));
 
     l.push_back(shaper.shape(font, "Eß hatte aber alle Welt einerlei Zünge und Sprache."));
     l.push_back(shaper.shape(font, "وَكَانَتِ الارْضُ كُلُّهَا لِسَانا وَاحِدا وَلُغَةً وَاحِدًَ.")); // ar
@@ -62,26 +64,30 @@ void onSetup(int w, int h) {
     l.push_back(shaper.shape(font, "محور 26 يوليو 42 يوليو end"));
     l.push_back(shaper.shape(font, "start محور 26 يوليو 42 يوليو end"));
 
+#ifdef NANO_VG
     vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+#endif
 
 }
 
 void onDraw(GLFWwindow *window, int width, int height) {
-
+    #ifdef NANO_VG
     nvgBeginFrame(vg, width, height, 1);
     nvgStrokeColor(vg, nvgRGBA(255,255,255,128));
     nvgFillColor(vg, nvgRGBA(64,64,64,128));
+    #endif
 
     batch.setClip(0,0, width, height);
 
     glm::vec2 offset(20, 20);
 
     for (auto& line : l) {
-        nvgBeginPath(vg);
+
+        #ifdef NANO_VG
         float asc = line.ascent();
         float dsc = line.descent();
         float adv = line.advance();
-
+        nvgBeginPath(vg);
         nvgMoveTo(vg, offset.x, offset.y - asc);
         nvgLineTo(vg, offset.x + adv, offset.y - asc);
         nvgLineTo(vg, offset.x + adv, offset.y + dsc);
@@ -92,12 +98,15 @@ void onDraw(GLFWwindow *window, int width, int height) {
         nvgMoveTo(vg, offset.x, offset.y);
         nvgLineTo(vg, offset.x + line.advance(), offset.y);
         nvgStroke(vg);
+        #endif
 
         offset.y = batch.draw(line, offset, std::max(width - 40, 10)).y;
         offset.y += 10;
     }
 
+    #ifdef NANO_VG
     nvgEndFrame(vg);
+    #endif
 
     renderer.beginFrame(width, height);
 
