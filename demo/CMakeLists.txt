@@ -15,7 +15,7 @@ target_link_libraries( basic
   LINK_PUBLIC
   alfons
   alfons_render
-  nanovg
+  # nanovg
   ${GLFW_STATIC_LIBRARIES})
 
 add_executable( enspiraling

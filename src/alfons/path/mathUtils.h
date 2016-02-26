@@ -29,12 +29,13 @@ static const float PI = M_PI;
 static const float TWO_PI = M_PI * 2.0;
 static const float HALF_PI = M_PI * 0.5;
 
-static inline float boundf(float value, float range) {
+
+inline float boundf(float value, float range) {
     float bound = fmodf(value, range);
     return (bound < 0) ? (bound + range) : bound;
 }
 
-static inline int bound(int value, int range) {
+inline int bound(int value, int range) {
     int bound = value % range;
     return (bound < 0) ? (bound + range) : bound;
 }
@@ -42,13 +43,13 @@ static inline int bound(int value, int range) {
 /*
  * S-SHAPED CROSS-FADE CURVE: 3 * (t ^ 2) - 2 * (t ^ 3)
  */
-static inline float ease(float t) { return (t * t * (3 - 2 * t)); }
+inline float ease(float t) { return (t * t * (3 - 2 * t)); }
 
 /*
  * Based on quake
  * http://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
  */
-static inline float fastSqrt(float x) {
+inline float fastSqrt(float x) {
     int i = *(int*)&x;              // store floating-point bits in integer
     i = 0x5f3759d5 - (i >> 1);      // initial guess for Newton's method
     float r = *(float*)&i;          // convert new bits into float
@@ -56,7 +57,7 @@ static inline float fastSqrt(float x) {
     return r * x;
 }
 
-int nextPowerOfTwo(int x) {
+inline int nextPowerOfTwo(int x) {
     int result = 1;
 
     while (result < x) {
@@ -66,26 +67,25 @@ int nextPowerOfTwo(int x) {
     return result;
 }
 
-bool isPowerOfTwo(int x) { return (x > 0) && !(x & (x - 1)); }
+inline bool isPowerOfTwo(int x) { return (x > 0) && !(x & (x - 1)); }
 
 /*
  * Reference for the 4 following functions:
  * http://stackoverflow.com/a/253874/50335
  */
-
-bool approximatelyEqual(float a, float b, float epsilon) {
+inline bool approximatelyEqual(float a, float b, float epsilon) {
     return fabsf(a - b) <= ((fabsf(a) < fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
-bool essentiallyEqual(float a, float b, float epsilon) {
+inline bool essentiallyEqual(float a, float b, float epsilon) {
     return fabsf(a - b) <= ((fabsf(a) > fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
-bool definitelyGreaterThan(float a, float b, float epsilon) {
+inline bool definitelyGreaterThan(float a, float b, float epsilon) {
     return (a - b) > ((fabsf(a) < fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
-bool definitelyLessThan(float a, float b, float epsilon) {
+inline bool definitelyLessThan(float a, float b, float epsilon) {
     return (b - a) > ((fabsf(a) < fabsf(b) ? fabsf(b) : fabsf(a)) * epsilon);
 }
 
@@ -109,5 +109,6 @@ public:
                               const std::vector<glm::vec2>& polygon);
     static bool isPointInside(const glm::vec2& point,
                               const std::vector<std::vector<glm::vec2>>& polygons);
+
 };
 }
