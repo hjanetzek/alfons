@@ -42,7 +42,8 @@ struct Shape {
             // When a codepoint uses multiple glyphs
             // only the first is set.
             unsigned char cluster : 1;
-            // Linebreak values
+            // Linebreak values, determine which breaks
+            // are possible *after* this glyph.
             unsigned char mustBreak : 1;
             unsigned char canBreak : 1;
             unsigned char noBreak : 1;
@@ -73,9 +74,9 @@ class LineLayout {
     hb_direction_t m_direction;
     FontFace::Metrics m_metrics;
 
-    float m_advance;
-    float m_middleLineFactor;
-    float m_scale;
+    float m_advance = 0;
+    float m_middleLineFactor = 1;
+    float m_scale = 1;
 
 public:
     // FIXME: For wrapped text
@@ -83,7 +84,10 @@ public:
 
     LineLayout() {}
 
-    LineLayout(std::shared_ptr<Font> _font,  std::vector<Shape> _shapes,
+    LineLayout(std::shared_ptr<Font> _font)
+        : m_font(std::move(_font)) {}
+
+    LineLayout(std::shared_ptr<Font> _font, std::vector<Shape> _shapes,
                FontFace::Metrics _metrics, hb_direction_t _direction)
         : m_font(std::move(_font)),
           m_shapes(std::move(_shapes)),
@@ -98,10 +102,19 @@ public:
         }
     }
 
+    void addShapes(const std::vector<Shape>& _shapes) {
+        for (auto& shape : _shapes) {
+            m_advance += shape.advance;
+        }
+        m_shapes.insert(m_shapes.end(), _shapes.begin(), _shapes.end());
+    }
+
     std::vector<Shape>& shapes() { return m_shapes; }
     const std::vector<Shape>& shapes() const { return m_shapes; }
 
     const Font& font() const { return *m_font; }
+
+    FontFace::Metrics& metrics() { return m_metrics; }
 
     glm::vec2 getOffset(Alignment alignX, Alignment alignY) const {
         return glm::vec2(offsetX(alignX), offsetY(alignY));

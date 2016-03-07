@@ -124,6 +124,20 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _position, LineMetr
     return draw(_line, 0, _line.shapes().size(), _position, _metrics);
 }
 
+glm::vec2 TextBatch::drawShapeRange(const LineLayout& _line, size_t _start, size_t _end,
+                                    glm::vec2 _position, LineMetrics& _metrics) {
+
+    for (size_t j = _start; j < _end; j++) {
+        auto& c = _line.shapes()[j];
+        if (!c.isSpace) {
+            drawShape(_line.font(), c, _position, _line.scale(), _metrics);
+        }
+
+        _position.x += _line.advance(c);
+    }
+    return _position;
+}
+
 glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
                           glm::vec2 _position, LineMetrics& _metrics) {
 
@@ -160,41 +174,60 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
 glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _position, float _width, LineMetrics& _metrics) {
 
     float lineWidth = 0;
-    int wordLength = 0;
-    int wordStart = 0;
     float startX = _position.x;
 
     float adv = 0;
+    size_t shapeCount = 0;
 
-    for (auto& c : _line.shapes()) {
-        wordLength++;
+    float lastWidth = 0;
+    size_t lastShape = 0;
+    size_t startShape = 0;
+
+    for (auto& shape : _line.shapes()) {
+
+        if (!shape.cluster) {
+            shapeCount++;
+            lineWidth += _line.advance(shape);
+            continue;
+        }
+
+        shapeCount++;
+        lineWidth += _line.advance(shape);
 
         // is break - or must break?
-        if (c.canBreak || c.mustBreak) {
-            _position.x = draw(_line, wordStart, wordStart + wordLength, _position, _metrics).x;
-            adv = std::max(adv, _position.x);
-
-            wordStart += wordLength;
-            wordLength = 0;
-            lineWidth = _position.x - startX;
-
-        } else {
-            lineWidth += _line.advance(c);
+        if (shape.canBreak || shape.mustBreak) {
+            lastShape = shapeCount;
+            lastWidth = lineWidth;
         }
 
-        if (lineWidth > _width) {
-            // only go to next line if chars have been added on the current line
-            if (_position.x > startX) {
-                _position.y += _line.height();
-                _position.x = startX;
-                lineWidth = 0;
+        if (lastShape != 0 && (lineWidth > _width || shape.mustBreak)) {
+            auto& endShape = _line.shapes()[lastShape-1];
+            if (endShape.isSpace) {
+                lineWidth -= _line.advance(endShape);
+                lastWidth -= _line.advance(endShape);
             }
+
+            adv = std::max(adv, drawShapeRange(_line, startShape, lastShape,
+                                               _position, _metrics).x);
+
+            lineWidth -= lastWidth;
+
+            startShape = lastShape;
+            lastShape = 0;
+
+            _position.y += _line.height();
+            _position.x = startX;
+            lineWidth = 0;
         }
     }
-    if (wordLength > 0) {
-        adv = std::max(adv, draw(_line, wordStart, wordStart + wordLength, _position, _metrics).x);
+
+    if (startShape < _line.shapes().size()-1) {
+        adv = std::max(adv, drawShapeRange(_line, startShape,
+                                           _line.shapes().size()-1,
+                                           _position, _metrics).x);
+        _position.y += _line.height();
     }
-    _position.y += _line.height();
+
     _position.x = adv;
     return _position;
 }

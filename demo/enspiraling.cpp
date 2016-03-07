@@ -26,7 +26,7 @@ using namespace alfons;
 DemoRenderer renderer;
 FontManager fontMan;
 TextShaper shaper;
-GlyphAtlas atlas(renderer, 256);
+GlyphAtlas atlas(renderer, 256, 3);
 TextBatch batch(atlas, renderer);
 LineLayout layout;
 TextSpiral spiral;
