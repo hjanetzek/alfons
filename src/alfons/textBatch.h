@@ -74,17 +74,20 @@ public:
     void drawShape(const Font& font, const Shape& shape, const glm::vec2& position,
                    float scale, LineMetrics& metrics = NO_METRICS);
 
-    glm::vec2 draw(const LineLayout& line, glm::vec2 position, LineMetrics& metrics);
+    glm::vec2 drawShapeRange(const LineLayout& _line, size_t _start, size_t _end,
+                             glm::vec2 _position, LineMetrics& _metrics = NO_METRICS);
 
-    glm::vec2 draw(const LineLayout& line, float x, float y, LineMetrics& metrics) {
+    glm::vec2 draw(const LineLayout& line, glm::vec2 position, LineMetrics& metrics = NO_METRICS);
+
+    glm::vec2 draw(const LineLayout& line, float x, float y, LineMetrics& metrics = NO_METRICS) {
         return draw(line, {x, y}, metrics);
     }
 
     glm::vec2 draw(const LineLayout& line, glm::vec2 position, float width,
-                   LineMetrics& metrics);
+                   LineMetrics& metrics = NO_METRICS);
 
     glm::vec2 draw(const LineLayout& line, size_t start, size_t end, glm::vec2 position,
-                   LineMetrics& metrics);
+                   LineMetrics& metrics = NO_METRICS);
 
     float draw(const LineLayout& line, const LineSampler& path,
                float offsetX = 0, float offsetY = 0);

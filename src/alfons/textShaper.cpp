@@ -32,6 +32,8 @@ struct TextRun {
 
     TextRun() {}
 
+    size_t length() const { return end - start; }
+
     TextRun(size_t _start, size_t _end, hb_script_t _script,
             hb_language_t _language, hb_direction_t _direction)
         : start(_start),
@@ -55,15 +57,17 @@ struct TextLine {
 
     using ScriptAndLanguageItem = Item<std::pair<hb_script_t, hb_language_t>>;
     using DirectionItem = Item<hb_direction_t>;
+    using LineItem = Item<int>;
 
     // Input
     UnicodeString* text;
     hb_language_t langHint;
     hb_direction_t overallDirection;
 
-    //
+    // Intermediate
     std::vector<ScriptAndLanguageItem> scriptLangItems;
     std::vector<DirectionItem> directionItems;
+
     // Result
     std::vector<TextRun> runs;
 
@@ -83,13 +87,13 @@ struct TextLine {
 class TextItemizer {
 public:
 
-    TextItemizer(LangHelper& _langHelper);
+    TextItemizer(const LangHelper& _langHelper);
     ~TextItemizer();
 
     void processLine(TextLine& _line);
 
 protected:
-    LangHelper& langHelper;
+    const LangHelper& langHelper;
     UBiDi* bidi;
     int bidiBufferSize = 0;
 
@@ -119,7 +123,7 @@ auto icuDirectionToHB(UBiDiDirection _direction) -> hb_direction_t {
     return (_direction == UBIDI_RTL) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR;
 }
 
-TextItemizer::TextItemizer(LangHelper& _langHelper)
+TextItemizer::TextItemizer(const LangHelper& _langHelper)
     : langHelper(_langHelper), bidi(nullptr) {
 }
 
@@ -199,7 +203,6 @@ void TextItemizer::itemizeDirection(TextLine& _line) {
         }
 
         int size = length < 256 ? 256 : length;
-        LOGE("UBIDI alloc: %d", size);
 
         // FIXME maxRuns too large?
         bidi = ubidi_openSized(size, 10, &error);
@@ -282,16 +285,26 @@ void TextItemizer::mergeItems(TextLine& _line) const {
     }
 }
 
+
 TextShaper::TextShaper() :
     m_itemizer(std::make_unique<TextItemizer>(m_langHelper)),
     m_textLine(std::make_unique<TextLine>()),
-    m_hbBuffer(hb_buffer_create()) {}
+    m_hbBuffer(hb_buffer_create()) {
+
+    static bool lineBreakInitialized = false;
+
+    if (!lineBreakInitialized) {
+        lineBreakInitialized = true;
+        init_linebreak();
+    }
+}
 
 TextShaper::~TextShaper() {
     hb_buffer_destroy(m_hbBuffer);
 }
 
-bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
+bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
+                            FontFace::Metrics& _lineMetrics) {
 
     hb_shape(_face.hbFont(), m_hbBuffer, NULL, 0);
 
@@ -300,12 +313,13 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
     const auto* glyphPositions = hb_buffer_get_glyph_positions(m_hbBuffer, NULL);
 
     bool missingGlyphs = false;
+    bool addedGlyphs = false;
 
     //log("run: %d to %d, rtl:%d", _run.start, _run.end, _run.direction == HB_DIRECTION_RTL);
 
     for (size_t pos = 0; pos < glyphCount; pos++) {
-        auto codepoint = glyphInfos[pos].codepoint;
-        auto clusterId = glyphInfos[pos].cluster;
+        hb_codepoint_t codepoint = glyphInfos[pos].codepoint;
+        uint32_t clusterId = glyphInfos[pos].cluster;
 
         auto id = clusterId;
         // Map cluster position to visual LTR order
@@ -316,15 +330,19 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
         }
 
         if (codepoint == 0) {
-            //log("missing glyphs");
-            missingGlyphs = true;
+            // log("missing glyphs BREAK %d\n",
+
+            if (m_linebreaks[clusterId] != LINEBREAK_MUSTBREAK) {
+                missingGlyphs = true;
+            }
+
+            //mustBreak = m_linebreaks[clusterId] == LINEBREAK_MUSTBREAK;
             continue;
         }
 
         if (m_glyphAdded[id] && m_shapes[id].face != _face.id()) {
             // cluster found, with another font (e.g. 'space')
-            LOGE("skip glyph %d/%d pos:%d", id, clusterId, pos);
-
+            // LOGE("skip glyph %d/%d pos:%d", id, clusterId, pos);
             continue;
         }
 
@@ -333,7 +351,6 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
 
         float advance = glyphPositions[pos].x_advance * _face.scale().x;
 
-        auto bufferPos = clusterId - _run.start;
         // log("add glyph %d/%d pos:%d linebreak:%d adv:%f",
         //     id, clusterId, pos, m_linebreaks[bufferPos], advance);
 
@@ -346,72 +363,95 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run){
             m_clusters[id].emplace_back(_face.id(), codepoint, offset, advance, 0);
 
         } else {
-            m_glyphAdded[id] = 1;
+            addedGlyphs = true;
 
-            uint8_t breakmode = m_linebreaks[bufferPos];
-            if (breakmode == 0) breakmode = 1;
+            m_glyphAdded[id] = 1;
+            uint8_t breakmode = 2;
+
+            //auto bufferPos = clusterId - _run.start;
+            auto bufferPos = clusterId;
+
+             if (_run.direction != HB_DIRECTION_RTL){
+                // if (bufferPos > 0)
+                //     breakmode = m_linebreaks[bufferPos-1];
+
+                if (bufferPos > 0)
+                    breakmode = m_linebreaks[bufferPos];
+
+            } else {
+                 if (bufferPos > 0) {
+                    breakmode = m_linebreaks[bufferPos];
+                 }
+            }
+             // printf("start %d, len:%d - %d\n", (int)_run.start,
+             //        (int)_run.length(), (int)bufferPos);
+
+             //uint8_t breakmode = m_linebreaks[bufferPos];
+             // if (breakmode == 0) breakmode = 1;
+             // if (mustBreak) {
+             //     //breakmode = LINEBREAK_MUSTBREAK;
+             //     mustBreak = false;
+             // }
 
             uint8_t flags = 1 |           // cluster start
-                ((breakmode == 0) << 1) | // must break
-                ((breakmode == 1) << 2) | // can break
-                ((breakmode == 2) << 3) | // no break
-                (_face.isSpace(codepoint) << 4);
+                //((breakmode == LINEBREAK_MUSTBREAK) ? 2 : 0) | // must break
+                ((breakmode == 1) ? 4 : 0) | // can break
+                ((breakmode == 2) ? 8 : 0) | // no break
+                (_face.isSpace(codepoint) ? 16 : 0);
 
             m_shapes[id] = Shape(_face.id(), codepoint, offset, advance, flags);
+            // icu::UnicodeString uni_str((UChar32)codepoint);
+            // std::string str;
+            // uni_str.toUTF8String(str);
+            // std::cout << '\'' << str
+            //           << "' " << std::to_string(breakmode)
+            //           << " " << std::to_string(clusterId)
+            //           << " " << std::to_string(_face.isSpace(codepoint)) << " | ";
+
         }
+    }
+
+    if (addedGlyphs) {
+        auto setMax = [](float& a, float b){ if (b > a) a = b; };
+        auto &metrics = _face.metrics();
+        setMax(_lineMetrics.height, metrics.height);
+        setMax(_lineMetrics.ascent, metrics.ascent);
+        setMax(_lineMetrics.descent, metrics.descent);
+        setMax(_lineMetrics.lineThickness, metrics.lineThickness);
+        setMax(_lineMetrics.underlineOffset, metrics.underlineOffset);
     }
 
     return !missingGlyphs;
 }
 
-LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
-                             const std::vector<TextRun>& _range) {
+bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
+                       const std::vector<TextRun>& _range, LineLayout& _layout) {
 
-    if (_range.empty()) {
-        log("Eeek empty line");
-        return LineLayout();
-    }
+    if (_range.empty()) { return true; }
 
     hb_language_t defaultLang = hb_language_get_default();
 
-    int numChars = _range.back().end;
+    int numChars = _line.text->length();
 
     std::vector<Shape> shapes;
     shapes.reserve(numChars);
 
-    FontFace::Metrics lineMetrics;
-
     for (const TextRun& run : _range) {
         size_t length = run.end - run.start;
         if (length >= m_shapes.capacity()) {
-            // log("resize glyph maps %d", length);
             m_shapes.resize(length + 16);
             m_glyphAdded.resize(m_shapes.capacity());
             m_linebreaks.reserve(m_shapes.capacity());
         }
 
-        // Setup harfbuzz buffer with current TextRun
+        // hb_buffer_clear_contents(m_hbBuffer);
 
-        hb_buffer_clear_contents(m_hbBuffer);
+        // hb_buffer_add_utf16(m_hbBuffer, _line.text->getBuffer(),
+        //                     _line.text->length(),
+        //                     run.start, run.end - run.start);
 
-        hb_buffer_add_utf16(m_hbBuffer, _line.text->getBuffer(),
-                            _line.text->length(),
-                            run.start, run.end - run.start);
-
-        hb_buffer_set_script(m_hbBuffer, run.script);
-        hb_buffer_set_direction(m_hbBuffer, run.direction);
-
-        const char* lang = nullptr;
-        if (run.language == HB_LANGUAGE_INVALID) {
-            hb_buffer_set_language(m_hbBuffer, defaultLang);
-        } else {
-            hb_buffer_set_language(m_hbBuffer, run.language);
-            lang = hb_language_to_string(run.language);
-        }
-
-        set_linebreaks_utf16(_line.text->getBuffer() + run.start,
-                             run.end - run.start, lang,
-                             m_linebreaks.data());
+        // hb_buffer_set_script(m_hbBuffer, run.script);
+        // hb_buffer_set_direction(m_hbBuffer, run.direction);
 
         m_glyphAdded.assign(length, 0);
 
@@ -419,18 +459,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
 
             if (!face->load()) { continue; }
 
-            if (processRun(*face, run)) {
-                auto setMax = [](float& a, float b){ if (b > a) a = b; };
-                auto &metrics = face->metrics();
-                setMax(lineMetrics.height, metrics.height);
-                setMax(lineMetrics.ascent, metrics.ascent);
-                setMax(lineMetrics.descent, metrics.descent);
-                setMax(lineMetrics.lineThickness, metrics.lineThickness);
-                setMax(lineMetrics.underlineOffset, metrics.underlineOffset);
-                break;
-            }
-            //log("missing glyph for lang: %s", hb_language_to_string(run.language));
-
+            // Setup harfbuzz buffer with current TextRun
             // TODO check why the contents must be set again!
             // - check if it is possible to only reset the hb_buffer position
             // - or determine the font used for each run in advance.
@@ -446,6 +475,12 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
             } else {
                 hb_buffer_set_language(m_hbBuffer, run.language);
             }
+
+            if (processRun(*face, run, _layout.metrics())) {
+                break;
+            }
+            //log("missing glyph for lang: %s", hb_language_to_string(run.language));
+
         }
 
         for (size_t i = 0; i < length; i++) {
@@ -462,33 +497,72 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line
         }
     }
 
-    return LineLayout(_font, shapes, lineMetrics, _line.overallDirection);
+    if (!shapes.empty()) {
+        // TODO: go back to start of cluster
+        shapes.back().mustBreak = true;
+    }
+
+    _layout.addShapes(shapes);
+
+    return true;
 }
 
 LineLayout TextShaper::shape(std::shared_ptr<Font>& _font,
                              const std::string& _text,
                              hb_language_t _langHint,
                              hb_direction_t _direction) {
+    LineLayout layout(_font);
 
     auto input = UnicodeString::fromUTF8(_text);
 
-    m_textLine->set(input, _langHint, _direction);
+    int numChars = input.length();
 
-    return shape(_font, *m_textLine);
+    const char* language = nullptr;
+    if (_langHint != HB_LANGUAGE_INVALID) {
+        language = hb_language_to_string(_langHint);
+    }
+
+    m_linebreaks.resize(numChars);
+    set_linebreaks_utf16(input.getBuffer(),
+                         numChars, language,
+                         m_linebreaks.data());
+
+    // for (int i = 0; i < numChars; i++){
+    //     std::cout << " " << std::to_string(m_linebreaks[i]);
+    // }
+    // std::cout << std::endl;
+
+    auto &line = *m_textLine;
+    int start = 0;
+
+    for (int pos = 0; pos < numChars; pos++) {
+        if (m_linebreaks[pos] != 0) { continue; }
+
+        auto cur = input.tempSubStringBetween(start, pos+1);
+        // LOGD("add line %d %d", start, pos);
+
+        line.set(cur, _langHint, _direction);
+        m_itemizer->processLine(line);
+
+        shape(_font, line, line.runs, layout);
+        start = pos + 1;
+
+    }
+    //shape(_font, *m_textLine, layout);
+
+    return layout;
 }
 
-LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, UnicodeString& _text) {
+// LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, UnicodeString& _text) {
+//     m_textLine->set(_text);
+//     return shape(_font, *m_textLine);
+// }
 
-    m_textLine->set(_text);
+// bool TextShaper::shape(std::shared_ptr<Font>& _font, TextLine& _line, LineLayout& _layout) {
 
-    return shape(_font, *m_textLine);
-}
+//     m_itemizer->processLine(_line);
 
-LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, TextLine& _line) {
-
-    m_itemizer->processLine(_line);
-
-    return shape(_font, _line, _line.runs);
-}
+//     return shape(_font, _line, _line.runs, _layout);
+// }
 
 }

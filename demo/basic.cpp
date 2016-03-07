@@ -30,7 +30,7 @@ using namespace alfons;
 
 DemoRenderer renderer;
 FontManager fontMan;
-GlyphAtlas atlas(renderer, 256);
+GlyphAtlas atlas(renderer, 256, 2);
 TextBatch batch(atlas, renderer);
 TextShaper shaper;
 std::shared_ptr<Font> font;
@@ -60,9 +60,10 @@ void onSetup(int w, int h) {
     l.push_back(shaper.shape(font, "На всей земле был один язык и одно наречие."));
     l.push_back(shaper.shape(font, "那時、天下人的口音言語、都是一樣。")); //zh-tw
 
-    // BIDI
-    l.push_back(shaper.shape(font, "محور 26 يوليو 42 يوليو end"));
-    l.push_back(shaper.shape(font, "start محور 26 يوليو 42 يوليو end"));
+    // BIDI - RTL paragraph
+    // l.push_back(shaper.shape(font, "ممم 26 يي\r\nيي 12\r\n34 ووووو end"));
+    // BIDI - LTR paragraph
+    //l.push_back(shaper.shape(font, "start محور 26 يوليو 42 يوليو end"));
 
 #ifdef NANO_VG
     vg = nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
