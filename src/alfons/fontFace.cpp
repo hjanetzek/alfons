@@ -93,15 +93,19 @@ bool FontFace::load() {
         error = FT_New_Face(m_ft.getLib(),
                             m_descriptor.source.uri().c_str(),
                             m_descriptor.faceIndex, &m_ftFace);
+        if (error) {
+            LOGE("Missing font: error: %d %s", error, m_descriptor.source.uri());
+            return false;
+        }
+
     } else {
         auto& buffer = m_descriptor.source.buffer();
         error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte*>(buffer->data()),
                                    buffer->size(), m_descriptor.faceIndex, &m_ftFace);
-    }
-
-    if (error) {
-        LOGE("Missing font: error: %d", error);
-        return false;
+        if (error) {
+            LOGE("Coul not create font: error: %d", error);
+            return false;
+        }
     }
 
     if (force_ucs2_charmap(m_ftFace)) {
