@@ -22,14 +22,14 @@
 namespace alfons {
 class Font;
 
-enum Alignment {
-    ALIGN_MIDDLE,
-    ALIGN_LEFT,
-    ALIGN_RIGHT,
-    ALIGN_TOP,
-    ALIGN_BASELINE,
-    ALIGN_BOTTOM,
-    ALIGN_BLOCK
+enum class Alignment {
+    middle,
+    left,
+    right,
+    top,
+    baseline,
+    bottom,
+    block
 };
 
 struct Shape {
@@ -94,7 +94,7 @@ public:
           m_direction(_direction),
           m_metrics(_metrics),
           m_advance(0),
-          m_middleLineFactor(0),
+          m_middleLineFactor(1.0),
           m_scale(1) {
 
         for (auto& shape : m_shapes) {
@@ -158,12 +158,12 @@ public:
 
     float offsetY(Alignment align) const {
         switch (align) {
-        case ALIGN_MIDDLE:
+        case Alignment::middle:
             return m_middleLineFactor *
                 (m_metrics.ascent - m_metrics.descent) * m_scale;
-        case ALIGN_TOP:
+        case Alignment::top:
             return +ascent();
-        case ALIGN_BOTTOM:
+        case Alignment::bottom:
             return -descent();
         default:
             return 0;
@@ -172,10 +172,10 @@ public:
 
     float offsetX(Alignment align) const {
         switch (align) {
-        case ALIGN_MIDDLE:
+        case Alignment::middle:
             return -0.5f * advance();
 
-        case ALIGN_RIGHT:
+        case Alignment::right:
             return -advance();
 
         default:

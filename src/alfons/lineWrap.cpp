@@ -468,8 +468,8 @@ bool WordWrap::wrapLine(LineLayout& layout, float width, float maxWidth,
 
     int wordStart = 0;
     float wordWidth = 0;
-    bool block = align == ALIGN_BLOCK;
-    bool centered = align == ALIGN_MIDDLE;
+    bool block = align == Alignment::block;
+    bool centered = align == Alignment::middle;
 
     float space = 0;
     float stretch = 0;
