@@ -9,17 +9,17 @@
 
 template <typename... Args>
 void log(const char* fmt, const Args&... args) {
-    __android_log_print(ANDROID_LOG_DEBUG, TAG, tfm::format(fmt, args...).c_str());
+    __android_log_print(ANDROID_LOG_DEBUG, TAG, "%s", tfm::format(fmt, args...).c_str());
 }
 #define LOGD(...)                                      \
     (void)(__android_log_print(ANDROID_LOG_DEBUG, TAG, \
-                               tfm::format(__VA_ARGS__).c_str()))
+                               "%s", tfm::format(__VA_ARGS__).c_str()))
 #define LOGI(...)                                     \
     (void)(__android_log_print(ANDROID_LOG_INFO, TAG, \
-                               tfm::format(__VA_ARGS__).c_str()))
+                               "%s", tfm::format(__VA_ARGS__).c_str()))
 #define LOGE(...)                                      \
     (void)(__android_log_print(ANDROID_LOG_ERROR, TAG, \
-                               tfm::format(__VA_ARGS__).c_str()))
+                               "%s", tfm::format(__VA_ARGS__).c_str()))
 
 #else
 
