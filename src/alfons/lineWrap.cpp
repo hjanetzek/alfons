@@ -463,7 +463,8 @@ std::vector<Row> WordWrap::breakLines() {
 }
 
 bool WordWrap::wrapLine(LineLayout& layout, float width, float maxWidth,
-                        Alignment align, glm::vec2& resultSize) {
+                        Alignment align, glm::vec2& resultSize,
+                        std::vector<glm::vec2> _offsets) {
     nodes.clear();
 
     int wordStart = 0;
@@ -555,7 +556,7 @@ bool WordWrap::wrapLine(LineLayout& layout, float width, float maxWidth,
 
     wordStart = 0;
 
-    layout.offsets.clear();
+    _offsets.clear();
     offset.y -= (rows.size() - 1) * layout.height();
 
     maxWidth = 0;
@@ -568,14 +569,14 @@ bool WordWrap::wrapLine(LineLayout& layout, float width, float maxWidth,
         if (!g.isSpace)
             glyphCount++;
 
-    layout.offsets.reserve(glyphCount);
+    _offsets.reserve(glyphCount);
 
     for (auto& row : rows) {
         float lineWordSpacing = space;
         if (block)
             lineWordSpacing += row.ratio * (row.ratio < 0 ? shrink : stretch);
 
-        int offsetStart = layout.offsets.size();
+        int offsetStart = _offsets.size();
 
         // if (centered)
         //   offset.x = (maxWidth - row.width) / 2;
@@ -589,7 +590,7 @@ bool WordWrap::wrapLine(LineLayout& layout, float width, float maxWidth,
                 for (uint32_t j = wordStart; j < box.b.id; j++) {
                     auto& c = layout.shapes()[j];
                     if (!c.isSpace) {
-                        layout.offsets.emplace_back(offset + c.position);
+                        _offsets.emplace_back(offset + c.position);
                         offset.x += layout.advance(c);
                     }
                 }
@@ -599,10 +600,10 @@ bool WordWrap::wrapLine(LineLayout& layout, float width, float maxWidth,
 
         if (centered) {
             //log("row width %f %f", row.width, offset.x);
-            int offsetEnd = layout.offsets.size();
+            int offsetEnd = _offsets.size();
             float justify = (maxWidth - offset.x) / 2;
             for (int j = offsetStart; j < offsetEnd; j++)
-                layout.offsets[j].x += justify;
+                _offsets[j].x += justify;
         }
 
         nodeStart = row.breakpoint + 1;

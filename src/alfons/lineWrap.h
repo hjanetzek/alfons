@@ -159,7 +159,8 @@ struct WordWrap {
     std::vector<Row> breakLines(void);
 
     bool wrapLine(LineLayout& layout, float width, float maxWidth,
-                  Alignment align, glm::vec2& resultSize);
+                  Alignment align, glm::vec2& resultSize,
+                  std::vector<glm::vec2> _offsets);
 
     ~WordWrap() {
         while (pool) {

@@ -79,8 +79,6 @@ class LineLayout {
     float m_scale = 1;
 
 public:
-    // FIXME: For wrapped text
-    std::vector<glm::vec2> offsets;
 
     LineLayout() {}
 

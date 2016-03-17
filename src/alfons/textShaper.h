@@ -32,18 +32,19 @@ public:
     ~TextShaper();
 
 
-    // LineLayout shape(std::shared_ptr<Font>& font, UnicodeString& line);
+    LineLayout shape(std::shared_ptr<Font>& font, UnicodeString& text,
+                     hb_language_t langHint = HB_LANGUAGE_INVALID,
+                     hb_direction_t direction = HB_DIRECTION_INVALID);
 
     LineLayout shape(std::shared_ptr<Font>& font, const std::string& text,
                      hb_language_t langHint = HB_LANGUAGE_INVALID,
-                     hb_direction_t overallDirection = HB_DIRECTION_INVALID);
+                     hb_direction_t direction = HB_DIRECTION_INVALID);
 
     LineLayout shape(std::shared_ptr<Font>& font, const std::string& text,
                      const std::string& langHint,
-                     hb_direction_t overallDirection = HB_DIRECTION_INVALID) {
-
+                     hb_direction_t direction = HB_DIRECTION_INVALID) {
         return shape(font, text, hb_language_from_string(langHint.c_str(), -1),
-                     overallDirection);
+                     direction);
     }
 
 protected:
