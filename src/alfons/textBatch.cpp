@@ -141,28 +141,18 @@ glm::vec2 TextBatch::drawShapeRange(const LineLayout& _line, size_t _start, size
 glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
                           glm::vec2 _position, LineMetrics& _metrics) {
 
-    if (_line.offsets.empty()) {
-        float startX = _position.x;
+    float startX = _position.x;
 
-        for (size_t j = _start; j < _end; j++) {
-            auto& c = _line.shapes()[j];
-            if (!c.isSpace) {
-                drawShape(_line.font(), c, _position, _line.scale(), _metrics);
-            }
-
-            _position.x += _line.advance(c);
-            if (c.mustBreak) {
-                _position.x = startX;
-                _position.y += _line.height();
-            }
+    for (size_t j = _start; j < _end; j++) {
+        auto& c = _line.shapes()[j];
+        if (!c.isSpace) {
+            drawShape(_line.font(), c, _position, _line.scale(), _metrics);
         }
-    } else {
-        int i = 0;
-        for (size_t j = _start; j < _end; j++) {
-            auto& c = _line.shapes()[j];
-            if (!c.isSpace) {
-                drawShape(_line.font(), c, _position + _line.offsets[i++], _line.scale(), _metrics);
-            }
+
+        _position.x += _line.advance(c);
+        if (c.mustBreak) {
+            _position.x = startX;
+            _position.y += _line.height();
         }
     }
 
