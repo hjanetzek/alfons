@@ -18,6 +18,8 @@ namespace alfons {
 class InputSource {
 public:
 
+    InputSource() {}
+
     InputSource(const std::string& _uri)
         : m_uri(_uri) {}
 
@@ -36,7 +38,7 @@ public:
     bool operator!() { return true; }
 
 protected:
-    std::string m_uri;
+    std::string m_uri = "";
     std::shared_ptr<std::vector<char>> m_buffer;
 };
 }
