@@ -40,8 +40,6 @@ public:
             : source(source),
               faceIndex(faceIndex),
               scale(scale) {}
-
-        bool empty() { return !source; }
     };
 
     struct Key {
@@ -121,6 +119,7 @@ protected:
     glm::vec2 m_scale;
     Metrics m_metrics;
     bool m_loaded;
+    bool m_invalid;
 
     FT_Face m_ftFace;
     hb_font_t* m_hbFont;

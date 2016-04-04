@@ -49,6 +49,7 @@ FontFace::FontFace(FreetypeHelper& _ft, FaceID _faceId,
     : m_ft(_ft), m_id(_faceId), m_descriptor(_descriptor),
       m_baseSize(_baseSize * _descriptor.scale),
       m_loaded(false),
+      m_invalid(false),
       m_ftFace(nullptr),
       m_hbFont(nullptr) {
 }
@@ -83,10 +84,13 @@ FontFace::getFullName() const {
 }
 
 bool FontFace::load() {
-    if (m_loaded)
-        return true;
+    if (m_loaded) {  return true; }
+    if (m_invalid) { return false; }
 
-    // FIXME mutex
+    if (!m_descriptor.source.isValid()) {
+        m_invalid = true;
+        return false;
+    }
 
     FT_Error error;
     if (m_descriptor.source.isUri()) {
@@ -95,6 +99,7 @@ bool FontFace::load() {
                             m_descriptor.faceIndex, &m_ftFace);
         if (error) {
             LOGE("Missing font: error: %d %s", error, m_descriptor.source.uri());
+            m_invalid = true;
             return false;
         }
 
@@ -104,6 +109,7 @@ bool FontFace::load() {
                                    buffer->size(), m_descriptor.faceIndex, &m_ftFace);
         if (error) {
             LOGE("Coul not create font: error: %d", error);
+            m_invalid = true;
             return false;
         }
     }
