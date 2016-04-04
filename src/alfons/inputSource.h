@@ -34,8 +34,7 @@ public:
 
     bool isUri() const { return !m_uri.empty(); }
 
-    // TODO - check valid?
-    bool operator!() { return true; }
+    bool isValid() { return (m_buffer && !m_buffer->empty()) || !m_uri.empty(); }
 
 protected:
     std::string m_uri = "";
