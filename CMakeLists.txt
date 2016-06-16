@@ -53,14 +53,26 @@ if (BUILD_DEMO)
   #target_include_directories(nanovg
   #    PUBLIC
   #    nanovg/src)
+elseif(USE_PKGCONFIG_LIBS)
+  include(glm)
+
+  include(FindPkgConfig)
+  pkg_check_modules(PKGS REQUIRED "icu-uc freetype2 harfbuzz")
+
+  set(ALFONS_DEPS_LIBRARIES
+    ${PKGS_LDFLAGS}
+    CACHE INTERNAL "alfons-libs" FORCE)
+
+  set(ALFONS_DEPS_INCLUDE_DIRS
+    ${PKGS_INCLUDE_DIRS}
+    CACHE INTERNAL "alfons-includes" FORCE)
+
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 else()
   include(glm)
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps)
-
-  #set(ALFONS_DEPS_INCLUDE_DIRS ${ALFONS_DEPS_INCLUDE_DIRS}
-  #  ${CMAKE_CURRENT_SOURCE_DIR}/alfons/src/logger
-  #  CACHE INTERNAL "alfons-includes" FORCE)
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 endif()
