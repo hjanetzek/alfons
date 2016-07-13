@@ -46,7 +46,8 @@ struct Iterator {
     T& container;
     bool reverse;
 
-    typedef decltype(container.begin()) I;
+    typedef typename T::const_iterator I;
+
     // Works for const and non-const std containers
     typedef typename std::iterator_traits<I>::reference R;
 

@@ -143,7 +143,7 @@ bool GlyphAtlas::createGlyph(const Font& _font, const GlyphKey& _key, AtlasGlyph
     const auto* gd = fontFace.createGlyph(_key.codepoint);
     if (!gd) { return false; }
 
-    uint pad = m_padding;
+    unsigned int pad = m_padding;
     int w = gd->x1 - gd->x0;
     int h = gd->y1 - gd->y0;
     int texW = w + pad * 2;

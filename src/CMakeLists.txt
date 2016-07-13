@@ -1,3 +1,7 @@
+if(POLICY CMP0054)
+  cmake_policy(SET CMP0054 NEW)
+endif()
+
 add_library (linebreak
   linebreak/linebreak.c
   linebreak/linebreakdata.c
@@ -42,6 +46,15 @@ endif()
 ### check for undefined symbols
 if(BUILD_SHARED_LIBS AND CMAKE_COMPILER_IS_GNUCXX)
   target_link_libraries( alfons PRIVATE "-z defs")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  target_compile_options(alfons
+    PRIVATE
+    -D_USE_MATH_DEFINES
+    -utf-8
+    -wd4267
+    -wd4244)
 endif()
 
 ########################################
