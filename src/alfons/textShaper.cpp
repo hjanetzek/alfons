@@ -400,7 +400,7 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
             // - check if it is possible to only reset the hb_buffer position
             // - or determine the font used for each run in advance.
             hb_buffer_clear_contents(m_hbBuffer);
-            hb_buffer_add_utf16(m_hbBuffer, _line.text->getBuffer(),
+            hb_buffer_add_utf16(m_hbBuffer, (const uint16_t*)_line.text->getBuffer(),
                                 _line.text->length(),
                                 run.start, run.end - run.start);
 
@@ -464,7 +464,7 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, UnicodeString& _text,
     }
 
     m_linebreaks.resize(numChars);
-    set_linebreaks_utf16(_text.getBuffer(),
+    set_linebreaks_utf16((const uint16_t*)_text.getBuffer(),
                          numChars, language,
                          m_linebreaks.data());
 

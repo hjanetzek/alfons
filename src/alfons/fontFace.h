@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <memory>
+#include <tuple>
 
 namespace alfons {
 
