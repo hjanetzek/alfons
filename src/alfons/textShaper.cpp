@@ -23,12 +23,12 @@ namespace alfons {
 
 
 struct TextRun {
-    size_t start;
-    size_t end;
+    size_t start = 0;
+    size_t end = 0;
 
-    hb_script_t script;
-    hb_language_t language;
-    hb_direction_t direction;
+    hb_script_t script = HB_SCRIPT_INVALID;
+    hb_language_t language = HB_LANGUAGE_INVALID;
+    hb_direction_t direction = HB_DIRECTION_INVALID;
 
     TextRun() {}
 

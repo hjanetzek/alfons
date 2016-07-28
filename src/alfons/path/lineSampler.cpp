@@ -176,8 +176,12 @@ LineSampler::Value LineSampler::offset2Value(float offset) const {
     Value value;
 
     float length = getLength();
-    if (length <= 0)
+    if (length <= 0) {
+        value.angle = 0;
+        value.offset = 0;
+        value.index = 0;
         return value;
+    }
 
     if ((mode == Mode::loop) || (mode == Mode::modulo)) {
         offset = boundf(offset, length);
@@ -436,6 +440,7 @@ LineSampler::ClosePoint LineSampler::closestPointFromSegment(const glm::vec2& in
         }
     } else {
         output.distance = std::numeric_limits<float>::max();
+        output.offset = 0;
     }
 
     return output;
