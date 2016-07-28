@@ -57,10 +57,10 @@ struct Shape {
     uint32_t codepoint;
     glm::vec2 position;
 
-    Shape() {}
+    Shape() : face(0), flags(0), advance(0), codepoint(0) {}
 
     Shape(uint8_t faceID, uint32_t codepoint, glm::vec2 offset,
-            float advance, uint8_t flags)
+          float advance, uint8_t flags)
         : face(faceID),
           flags(flags),
           advance(advance),
@@ -71,7 +71,7 @@ struct Shape {
 class LineLayout {
     std::shared_ptr<Font> m_font;
     std::vector<Shape> m_shapes;
-    hb_direction_t m_direction;
+    hb_direction_t m_direction = HB_DIRECTION_INVALID;
     FontFace::Metrics m_metrics;
 
     float m_advance = 0;

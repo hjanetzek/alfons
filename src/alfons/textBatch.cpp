@@ -23,7 +23,12 @@ namespace alfons {
 LineMetrics NO_METRICS;
 
 TextBatch::TextBatch(GlyphAtlas& _atlas, MeshCallback& _mesh)
-    : m_atlas(_atlas), m_mesh(_mesh) {}
+    : m_atlas(_atlas), m_mesh(_mesh) {
+    m_clip.x1 = 0;
+    m_clip.y1 = 0;
+    m_clip.x2 = 0;
+    m_clip.y2 = 0;
+}
 
 void TextBatch::setClip(const Rect& _clipRect) {
     m_clip = _clipRect;
