@@ -87,8 +87,8 @@ public:
 
     void setTextState(uint32_t _state) { m_state = _state; }
 
-    void drawGlyph(const Quad& box, const AtlasGlyph& glyph) override;
-    void drawGlyph(const Rect& rect, const AtlasGlyph& glyph) override;
+    void drawGlyph(const Shape& shape, const Quad& box, const AtlasGlyph& glyph) override;
+    void drawGlyph(const Shape& shape, const Rect& rect, const AtlasGlyph& glyph) override;
 
     void addTexture(AtlasID id, uint16_t textureWidth, uint16_t textureHeight) override;
     void addGlyph(AtlasID, uint16_t gx, uint16_t gy, uint16_t gw, uint16_t gh,

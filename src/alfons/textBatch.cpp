@@ -91,7 +91,7 @@ void TextBatch::drawShape(const Font& _font, const Shape& _shape,
         return;
     }
 
-    m_mesh.drawGlyph(rect, atlasGlyph);
+    m_mesh.drawGlyph(_shape, rect, atlasGlyph);
 
     if (&_metrics != &NO_METRICS) {
         _metrics.addExtents({rect.x1, rect.y1, rect.x2, rect.y2});
@@ -116,7 +116,7 @@ void TextBatch::drawTransformedShape(const Font& _font, const Shape& _shape,
         return;
     }
 
-    m_mesh.drawGlyph(quad, atlasGlyph);
+    m_mesh.drawGlyph(_shape, quad, atlasGlyph);
 
     // FIXME: account for matrix transform
     // return glm::vec4(atlasGlyph.glyph->u1,

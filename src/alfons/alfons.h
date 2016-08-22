@@ -6,6 +6,7 @@
 namespace alfons {
 
 struct AtlasGlyph;
+struct Shape;
 using AtlasID = size_t;
 
 struct Quad {
@@ -27,8 +28,8 @@ struct Rect {
 };
 
 struct MeshCallback {
-    virtual void drawGlyph(const Quad& quad, const AtlasGlyph& glyph) = 0;
-    virtual void drawGlyph(const Rect& rect, const AtlasGlyph& glyph) = 0;
+    virtual void drawGlyph(const Shape& shape, const Quad& quad, const AtlasGlyph& glyph) = 0;
+    virtual void drawGlyph(const Shape& shape, const Rect& rect, const AtlasGlyph& glyph) = 0;
 };
 
 struct TextureCallback {

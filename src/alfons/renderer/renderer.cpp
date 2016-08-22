@@ -20,12 +20,12 @@ Renderer::Renderer() {}
 
 Renderer::~Renderer() {}
 
-void Renderer::drawGlyph(const Quad& _quad, const AtlasGlyph& _glyph) {
+void Renderer::drawGlyph(const Shape& shape, const Quad& _quad, const AtlasGlyph& _glyph) {
     batches[_glyph.atlas].add(_quad, *_glyph.glyph, m_state);
 
 }
 
-void Renderer::drawGlyph(const Rect& _rect, const AtlasGlyph& _glyph) {
+void Renderer::drawGlyph(const Shape& shape, const Rect& _rect, const AtlasGlyph& _glyph) {
     batches[_glyph.atlas].add(_rect, *_glyph.glyph, m_state);
 }
 
