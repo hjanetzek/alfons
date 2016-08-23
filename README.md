@@ -1,9 +1,9 @@
-Alfons is a text rendering utility library (intended for use with OpenGL)
+Alfons text rendering utilities:
 
 This Library is based on the 'New Chronotext Toolkit', extracting only the text
-rendering parts and removing the Cinder dependency + heavy refactoring.
+rendering parts and removing the Cinder dependency.
 
-*This is experimental code!*
+Alfons bakes your text and fonts to delicious vertices and textures (best served with some OpenGL)
 
 * Credits
 
