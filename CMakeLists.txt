@@ -72,7 +72,6 @@ elseif(USE_PKGCONFIG_LIBS)
 else()
   include(glm)
 
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps)
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 endif()

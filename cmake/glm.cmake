@@ -19,8 +19,8 @@ if (NOT DEFINED ${GLM_INCLUDE_DIR})
       GIT_TAG 6e5f42b
 
       # put checkout into build-dir/glm
-      PREFIX ${PROJECT_SOURCE_DIR}/deps/glm
-      SOURCE_DIR "glm"
+      PREFIX deps/glm
+      SOURCE_DIR glm
       # Use source dir for build dir
       BUILD_IN_SOURCE 1
 
@@ -29,7 +29,7 @@ if (NOT DEFINED ${GLM_INCLUDE_DIR})
       BUILD_COMMAND ""
       INSTALL_COMMAND "")
 
-    set(GLM_INCLUDE_DIR ${PROJECT_BINARY_DIR}/glm)
+    set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/glm)
 
     set(USE_OWN_GLM 1)
 
