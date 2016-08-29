@@ -1,3 +1,0 @@
-[submodule "deps/harfbuzz-icu-freetype"]
-	path = deps/harfbuzz-icu-freetype
-	url = https://github.com/tangrams/harfbuzz-icu-freetype.git
