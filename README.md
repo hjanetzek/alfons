@@ -5,7 +5,9 @@ rendering parts and removing the Cinder dependency.
 
 Alfons bakes your text and fonts to delicious vertices and textures (best served with some OpenGL)
 
-* Credits
+For examples see https://github.com/hjanetzek/alfons-demo
+
+### Credits
 
 - Chronotext (https://github.com/arielm/wandering-chronotext-toolkit, http://chronotext.org/)
 - Fontstash (https://github.com/memononen/fontstash)
