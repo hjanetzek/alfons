@@ -45,6 +45,7 @@ inline int bound(int value, int range) {
  */
 inline float ease(float t) { return (t * t * (3 - 2 * t)); }
 
+#if 0
 /*
  * Based on quake
  * http://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
@@ -56,6 +57,7 @@ inline float fastSqrt(float x) {
     r *= (1.5f - 0.5f * x * r * r); // One round of Newton's method
     return r * x;
 }
+#endif
 
 inline int nextPowerOfTwo(int x) {
     int result = 1;

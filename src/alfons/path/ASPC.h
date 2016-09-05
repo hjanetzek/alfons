@@ -16,10 +16,11 @@
 
 #pragma once
 
-#include "lineSampler.h"
 
+#include "glm/glm.hpp"
 #include "glm/gtx/norm.hpp"
 
+#include <vector>
 #include <array>
 #include <functional>
 #include <cstdlib>
@@ -28,7 +29,7 @@ namespace alfons {
 
 class ASPC {
 public:
-    ASPC(std::function<glm::vec2(float, glm::vec2*)> gamma, LineSampler& path, float tol = 1)
+    ASPC(std::function<glm::vec2(float, glm::vec2*)> gamma, std::vector<glm::vec2>& path, float tol = 1)
         : gamma(gamma),
           path(path),
           tol(tol) {
@@ -60,7 +61,7 @@ public:
 
 protected:
     std::function<glm::vec2(float, glm::vec2*)> gamma;
-    LineSampler& path;
+    std::vector<glm::vec2>& path;
     float tol;
 
     std::array<glm::vec2, 4> in;
@@ -74,7 +75,7 @@ protected:
         float cross = glm::dot(glm::vec3(p0 - r, 0.0f), glm::vec3(p1 - r, 0.0f));
 
         if (cross * cross < tol) {
-            path.add(p0);
+            path.push_back(p0);
         } else {
             sample(t0, p0, rt, r);
             sample(rt, r, t1, p1);

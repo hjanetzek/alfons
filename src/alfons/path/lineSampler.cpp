@@ -10,13 +10,11 @@
 
 #include "lineSampler.h"
 
-#include "mathUtils.h"
+#include "alfons/path/mathUtils.h"
+#include "alfons/path/splinePath.h"
 #include "alfons/utils.h"
-#include "glm/gtx/norm.hpp"
 
-#if 0
-#include "geom/cinderMath.h"
-#endif
+#include "glm/gtx/norm.hpp"
 
 namespace alfons {
 LineSampler::LineSampler(int capacity)
@@ -30,54 +28,6 @@ LineSampler::LineSampler(const std::vector<glm::vec2>& points)
     : mode(Mode::tangent) {
     add(points);
 }
-
-#if 0
-  LineSampler::LineSampler(const Path2d &path, float approximationScale)
-    : mode(Mode::tangent) {
-    auto pts = path.subdivide(approximationScale);
-    add(pts);
-
-    if (isClosed())	{
-      setMode(LineSampler::Mode::loop);
-    }
-  }
-
-  LineSampler::LineSampler(DataSourceRef source)
-    : mode(Mode::tangent)
-  {
-    read(source);
-  }
-
-  void LineSampler::read(DataSourceRef source)
-  {
-    auto stream = source->createStream();
-
-    int newPointsSize;
-    stream->readLittle(&newPointsSize);
-
-    extendCapacity(newPointsSize);
-
-    vec2 point;
-
-    for (int i = 0; i < newPointsSize; i++) {
-        stream->readLittle(&point.x);
-        stream->readLittle(&point.y);
-        add(point);
-      }
-  }
-
-  void LineSampler::write(DataTargetRef target)
-  {
-    auto stream = target->getStream();
-
-    stream->writeLittle(size());
-
-    for (auto &point : points) {
-      stream->writeLittle(point.x);
-      stream->writeLittle(point.y);
-    }
-  }
-#endif
 
 void LineSampler::add(const std::vector<glm::vec2>& newPoints) {
     extendCapacity(newPoints.size());
@@ -100,14 +50,6 @@ void LineSampler::add(const glm::vec2& point) {
         lengths.push_back(lengths.back() + glm::length(delta));
     }
     points.push_back(point);
-}
-
-const std::vector<glm::vec2>& LineSampler::getPoints() const {
-    return points;
-}
-
-const std::vector<float>& LineSampler::getLengths() const {
-    return lengths;
 }
 
 void LineSampler::clear() {
@@ -399,10 +341,9 @@ bool LineSampler::findClosestPoint(const glm::vec2& input, float threshold, Clos
     return false;
 }
 
-/*
-   * REFERENCE: "Minimum Distance between a Point and a Line" BY Paul Bourke
-   * http://paulbourke.net/geometry/pointlineplane
-   */
+/* Reference: "Minimum Distance between a Point and a Line" BY Paul Bourke
+ * http://paulbourke.net/geometry/pointlineplane
+ */
 LineSampler::ClosePoint LineSampler::closestPointFromSegment(const glm::vec2& input, int segmentIndex) const {
     LineSampler::ClosePoint output;
 
@@ -451,4 +392,38 @@ void LineSampler::extendCapacity(int amount) {
     points.reserve(newCapacity);
     lengths.reserve(newCapacity);
 }
+
+void LineSampler::sampleSpline(const SplinePath &path, SplineType type, float tolerance) {
+    points.clear();
+    lengths.clear();
+
+    path.flush(type, points, tolerance);
+
+    if (points.size() < 2) { return; }
+
+
+    lengths.push_back(0);
+
+    size_t end = points.size();
+    for (size_t i = 1; i < end; ) {
+        glm::vec2 delta = points[i] - points[i-1];
+
+        // Ignore zero-length segments
+        if (delta == glm::vec2(0)) {
+            points.erase(points.begin() + i);
+            end -= 1;
+            continue;
+        }
+        lengths.push_back(lengths.back() + glm::length(delta));
+
+        i++;
+    }
+
+    if (path.isClosed()) {
+        close();
+        setMode(LineSampler::Mode::loop);
+    }
+
+}
+
 }

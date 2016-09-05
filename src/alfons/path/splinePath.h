@@ -9,7 +9,7 @@
  */
 
 /*
- * REFERENCES:
+ * References:
  *
  * "Spline Curves" BY Tim Lambert
  * http://www.cse.unsw.edu.au/~lambert/splines
@@ -18,21 +18,25 @@
 /*
  * TODO:
  *
- * IMPLEMENTING THE HERMITE CURVE (WITH BIAS AND TENSION) WOULD BE A MUST:
+ * Implementing the hermite curve (with bias and tension) would be a must:
  * http://paulbourke.net/miscellaneous/interpolation
  */
 
 #pragma once
 
-#include "lineSampler.h"
+#include "glm/glm.hpp"
+
+#include <vector>
 
 namespace alfons {
+
+enum class SplineType {
+    bspline,
+    catmull_rom
+};
+
 class SplinePath {
 public:
-    enum class Type {
-        bspline,
-        catmull_rom
-    };
 
     SplinePath(int capacity = 0);
     SplinePath(const std::vector<glm::vec2>& points);
@@ -42,8 +46,6 @@ public:
 
     const std::vector<glm::vec2>& getPoints() const;
 
-    void setPoints(const float points[], int length);
-
     void clear();
     int size() const;
     bool empty() const;
@@ -51,20 +53,14 @@ public:
     void close();
     bool isClosed() const;
 
-    void flush(Type type, LineSampler& path, float tol = 1) const;
-
-    inline LineSampler flush(Type type, float tol = 1) const {
-        LineSampler path;
-        flush(type, path, tol);
-        return path;
-    }
+    void flush(SplineType type, std::vector<glm::vec2>& path, float tol = 1) const;
 
 protected:
     std::vector<glm::vec2> points;
     bool closed;
 };
 
-static glm::vec2 GammaBSpline(float t, glm::vec2* in) {
+static inline glm::vec2 GammaBSpline(float t, glm::vec2* in) {
     float w0 = ((3 - t) * t - 3) * t + 1;
     float w1 = ((3 * t - 6) * t) * t + 4;
     float w2 = ((3 - 3 * t) * t + 3) * t + 1;
@@ -75,7 +71,7 @@ static glm::vec2 GammaBSpline(float t, glm::vec2* in) {
            6.0f;
 }
 
-static glm::vec2 GammaCatmullRom(float t, glm::vec2* in) {
+static inline glm::vec2 GammaCatmullRom(float t, glm::vec2* in) {
     float w0 = ((2 - t) * t - 1) * t;
     float w1 = ((3 * t - 5) * t) * t + 2;
     float w2 = ((4 - 3 * t) * t + 1) * t;
