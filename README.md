@@ -1,4 +1,5 @@
-Alfons text rendering utilities:
+# Alfons 
+Text rendering utilities
 
 This Library is based on the 'New Chronotext Toolkit', extracting only the text
 rendering parts and removing the Cinder dependency.
