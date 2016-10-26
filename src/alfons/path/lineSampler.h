@@ -14,16 +14,12 @@
 
 #include "alfons/alfons.h"
 
-#if 0
-#include "geom/rect.h"
-#include "geom/Path2d.h"
-#include "geom/DataSource.h"
-#include "geom/DataTarget.h"
-#endif
-
 #include <vector>
 
 namespace alfons {
+
+class SplinePath;
+enum class SplineType;
 
 class LineSampler {
 public:
@@ -35,9 +31,9 @@ public:
     };
 
     struct ClosePoint {
-        glm::vec2 position; // POSITION OF CLOSEST-POINT ON PATH
-        float offset;       // OFFSET OF CLOSEST-POINT ON PATH
-        float distance;     // DISTANCE TO CLOSEST-POINT ON PATH
+        glm::vec2 position; // position of closest-point on path
+        float offset;       // offset of closest-point on path
+        float distance;     // distance to closest-point on path
     };
 
     enum class Mode {
@@ -49,19 +45,18 @@ public:
 
     LineSampler(int capacity = 0);
     LineSampler(const std::vector<glm::vec2>& points);
-#if 0
-    LineSampler(const Path2d &path, float approximationScale = 1.0f);
-    LineSampler(DataSourceRef source);
-    void read(DataSourceRef source);
-    void write(DataTargetRef target);
-#endif
+
+    void sampleSpline(const SplinePath &path, SplineType type, float tolerance);
 
     void add(const std::vector<glm::vec2>& points);
     void add(const glm::vec2& point);
     inline void add(float x, float y) { add(glm::vec2(x, y)); }
 
-    const std::vector<glm::vec2>& getPoints() const;
-    const std::vector<float>& getLengths() const;
+    const std::vector<glm::vec2>& getPoints() const { return points; }
+    const std::vector<float>& getLengths() const { return lengths; }
+
+    std::vector<glm::vec2>& getPoints() { return points; }
+    std::vector<float>& getLengths() { return lengths; }
 
     void clear();
     int size() const;

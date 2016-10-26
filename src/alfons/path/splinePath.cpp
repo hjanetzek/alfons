@@ -41,13 +41,6 @@ void SplinePath::add(const glm::vec2& point) {
 
     points.emplace_back(point);
 }
-//http://stackoverflow.com/questions/259297/how-do-you-copy-the-contents-of-an-array-to-a-stdvector-in-c-without-looping
-
-void SplinePath::setPoints(const float newPoints[], int cnt) {
-    clear();
-    points.resize(cnt / 2);
-    memcpy(&points[0], &newPoints[0], cnt * sizeof(float));
-}
 
 const std::vector<glm::vec2>& SplinePath::getPoints() const {
     return points;
@@ -79,15 +72,15 @@ bool SplinePath::isClosed() const {
     return closed;
 }
 
-void SplinePath::flush(Type type, LineSampler& path, float tol) const {
+void SplinePath::flush(SplineType type, std::vector<glm::vec2>& path, float tol) const {
     std::function<glm::vec2(float, glm::vec2*)> gamma;
 
     switch (type) {
-    case Type::bspline:
+    case SplineType::bspline:
         gamma = GammaBSpline;
         break;
 
-    case Type::catmull_rom:
+    case SplineType::catmull_rom:
         gamma = GammaCatmullRom;
         break;
 
@@ -103,7 +96,7 @@ void SplinePath::flush(Type type, LineSampler& path, float tol) const {
         if (closed) {
             aspc.segment(points[size - 1], points[0], points[1], points[2]);
         } else {
-            if (type == Type::bspline) {
+            if (type == SplineType::bspline) {
                 aspc.segment(points[0], points[0], points[0], points[1]);
             }
 
@@ -117,14 +110,11 @@ void SplinePath::flush(Type type, LineSampler& path, float tol) const {
         if (closed) {
             aspc.segment(points[size - 3], points[size - 2], points[size - 1], points[0]);
             aspc.segment(points[size - 2], points[size - 1], points[0], points[1]);
-
-            path.close();
-            path.setMode(LineSampler::Mode::loop);
         } else {
             aspc.segment(points[size - 3], points[size - 2], points[size - 1], points[size - 1]);
             aspc.segment(points[size - 2], points[size - 1], points[size - 1], points[size - 1]);
 
-            if (type == Type::bspline) {
+            if (type == SplineType::bspline) {
                 aspc.segment(points[size - 1], points[size - 1], points[size - 1], points[size - 1]);
             }
         }
