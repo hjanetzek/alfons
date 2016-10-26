@@ -10,13 +10,18 @@
 
 #include "lineSampler.h"
 
-#include "alfons/path/mathUtils.h"
 #include "alfons/path/splinePath.h"
 #include "alfons/utils.h"
 
 #include "glm/gtx/norm.hpp"
 
 namespace alfons {
+
+static float boundf(float value, float range) {
+    float bound = fmodf(value, range);
+    return (bound < 0) ? (bound + range) : bound;
+}
+
 LineSampler::LineSampler(int capacity)
     : mode(Mode::tangent) {
     if (capacity > 0) {
