@@ -168,6 +168,8 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, size_t _start, size_t _end,
 
 glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _position, float _width, LineMetrics& _metrics) {
 
+    if (_line.shapes().empty()) { return _position; }
+
     float lineWidth = 0;
     float startX = _position.x;
 
