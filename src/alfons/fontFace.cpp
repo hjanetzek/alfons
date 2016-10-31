@@ -138,7 +138,7 @@ bool FontFace::load() {
     // - Without a fractional advance: character spacing looks dumb
     // - Without a fractional height: some characters won't be
     //   perfectly aligned on the baseline
-    int res = 64;
+    float res = 1;
     int dpi = 72;
     FT_Set_Char_Size(m_ftFace,
                      m_baseSize * 64, // char_width in 26.6 fixed-point
