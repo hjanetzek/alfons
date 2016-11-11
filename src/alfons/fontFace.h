@@ -99,8 +99,6 @@ public:
 
     const Metrics& metrics() const { return m_metrics; }
 
-    const glm::vec2& scale() const { return m_scale; }
-
     const std::vector<hb_script_t>& scripts() const {
         return m_scripts;
     }
@@ -117,7 +115,6 @@ protected:
     Descriptor m_descriptor;
     float m_baseSize;
 
-    glm::vec2 m_scale;
     Metrics m_metrics;
     bool m_loaded;
     bool m_invalid;

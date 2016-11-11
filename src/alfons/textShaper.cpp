@@ -19,8 +19,9 @@
 
 #include "logger.h"
 
-namespace alfons {
+#define FT_INV_SCALE (1.f/64.f)
 
+namespace alfons {
 
 struct TextRun {
     size_t start = 0;
@@ -327,10 +328,10 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
             continue;
         }
 
-        auto offset = glm::vec2(glyphPositions[pos].x_offset,
-                                -glyphPositions[pos].y_offset) * _face.scale();
+        auto offset = glm::vec2(glyphPositions[pos].x_offset * FT_INV_SCALE,
+                                -glyphPositions[pos].y_offset * FT_INV_SCALE);
 
-        float advance = glyphPositions[pos].x_advance * _face.scale().x;
+        float advance = glyphPositions[pos].x_advance * FT_INV_SCALE;
 
         if (m_glyphAdded[id]) {
             m_glyphAdded[id] = 2;

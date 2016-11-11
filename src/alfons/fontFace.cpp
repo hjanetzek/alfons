@@ -129,44 +129,20 @@ bool FontFace::load() {
     // - coordinates are expressed in 1/64th of a pixel
     //   (also known as 26.6 fixed-point numbers).
 
-    // This basiclly sets the pixel size since dpi == 72, res is
-    // unscaled via matrix below.
-    //
-    // Using a matrix with a multiplier allows for fractional values.
-    // Trick from http://code.google.com/p/freetype-gl/
-    //
-    // - Without a fractional advance: character spacing looks dumb
-    // - Without a fractional height: some characters won't be
-    //   perfectly aligned on the baseline
-    int res = 64;
+    // This basiclly sets the pixel size since dpi == 72
     int dpi = 72;
     FT_Set_Char_Size(m_ftFace,
                      m_baseSize * 64, // char_width in 26.6 fixed-point
                      m_baseSize * 64, // char_height in 26.6 fixed-point
-                     dpi * res,       // horizontal_resolution
-                     dpi * res);      // vertical_resolution
-
-    // http://www.freetype.org/freetype2/docs/tutorial/step1.html d)
-    FT_Matrix matrix = {
-        int((1.0 / res) * 0x10000L), int((0.0)       * 0x10000L),
-        int((0.0)       * 0x10000L), int((1.0 / res) * 0x10000L)
-    };
-
-    // From FT2 docs:
-    // Note that this also transforms the ‘face.glyph.advance’
-    // field, but *** not the values in ‘face.glyph.metrics’ ***
-    FT_Set_Transform(m_ftFace, &matrix, nullptr);
+                     dpi,       // horizontal_resolution
+                     dpi);      // vertical_resolution
 
     // This must take place after ftFace is properly scaled and transformed
     m_hbFont = hb_ft_font_create(m_ftFace, nullptr);
 
-    // Why the 1.f/res? See the note above
-    m_scale = glm::vec2(1.f / res, 1.f / res);
-    m_scale /= 64.f;
-
-    m_metrics.height = m_ftFace->size->metrics.height * m_scale.y;
-    m_metrics.ascent = m_ftFace->size->metrics.ascender * m_scale.y;
-    m_metrics.descent = -m_ftFace->size->metrics.descender * m_scale.y;
+    m_metrics.height = m_ftFace->size->metrics.height / 64.f;
+    m_metrics.ascent = m_ftFace->size->metrics.ascender / 64.f;
+    m_metrics.descent = -m_ftFace->size->metrics.descender / 64.f;
 
     m_metrics.lineThickness = m_ftFace->underline_thickness / 64.f;
     m_metrics.underlineOffset = -m_ftFace->underline_position / 64.f;
