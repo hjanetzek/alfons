@@ -93,6 +93,15 @@ bool FontFace::load() {
     }
 
     FT_Error error;
+
+    if (m_descriptor.source.hasSourceCallback()) {
+        if (!m_descriptor.source.resolveSource()) {
+            LOGE("Invalid data loaded by source callback");
+            m_invalid = true;
+            return false;
+        }
+    }
+
     if (m_descriptor.source.isUri()) {
         error = FT_New_Face(m_ft.getLib(),
                             m_descriptor.source.uri().c_str(),
