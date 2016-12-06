@@ -16,22 +16,23 @@
 
 namespace alfons {
 
-std::shared_ptr<Font> FontManager::addFont(std::string _name, InputSource _source,
-                                           Font::Properties _properties) {
+std::shared_ptr<Font> FontManager::addFont(std::string _name, Font::Properties _properties,
+                                           InputSource _source) {
 
     auto key = make_pair(_name, _properties);
     auto it = m_fonts.find(key);
 
     if (it != m_fonts.end()) {
         return it->second;
-        //return nullptr;
     }
 
     auto font = std::make_shared<Font>(_properties);
     m_fonts.emplace(std::move(key), font);
 
-    auto descriptor = FontFace::Descriptor(_source, 0, 1);
-    font->addFace(addFontFace(descriptor, _properties.baseSize));
+    if (_source.isValid()) {
+        auto descriptor = FontFace::Descriptor(_source, 0, 1);
+        font->addFace(addFontFace(descriptor, _properties.baseSize));
+    }
 
     return font;
 }
