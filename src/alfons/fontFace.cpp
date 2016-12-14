@@ -114,8 +114,8 @@ bool FontFace::load() {
 
     } else {
         auto& buffer = m_descriptor.source.buffer();
-        error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte*>(buffer->data()),
-                                   buffer->size(), m_descriptor.faceIndex, &m_ftFace);
+        error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte*>(buffer.data()),
+                                   buffer.size(), m_descriptor.faceIndex, &m_ftFace);
         if (error) {
             LOGE("Coul not create font: error: %d", error);
             m_invalid = true;

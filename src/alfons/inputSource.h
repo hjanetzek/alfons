@@ -25,46 +25,71 @@ public:
     InputSource() {}
 
     InputSource(const std::string& _uri)
-        : m_uri(_uri) {}
+        : m_uri(_uri), m_data(std::make_shared<Data>()) {}
 
     InputSource(LoadSourceHandle _loadSource)
-        : m_loadSource(_loadSource) {}
+        : m_data(std::make_shared<Data>(_loadSource)) {}
 
     InputSource(std::vector<char> _data)
-        : m_buffer(std::make_shared<std::vector<char>>(std::move(_data))) {}
+        : m_data(std::make_shared<Data>(std::move(_data))) {}
 
     InputSource(const char* data, size_t len)
-        : m_buffer(std::make_shared<std::vector<char>>(data, data + len)) {}
+        : m_data(std::make_shared<Data>(std::vector<char>{data, data + len})) {}
 
     const std::string& uri() const { return m_uri; }
-    const auto buffer() const { return m_buffer; }
+
+    const std::vector<char>& buffer() const {
+        return m_data->buffer;
+    }
 
     bool isUri() const { return !m_uri.empty(); }
 
-    bool hasSourceCallback() { return bool(m_loadSource); }
+    bool hasSourceCallback() { return m_data && bool(m_data->loadSource); }
 
     bool resolveSource() {
-        if (m_buffer) {
-            return true;
-        }
-
-        auto buffer = m_loadSource();
-
-        if (buffer.size() == 0) {
+        if (!m_data || !bool(m_data->loadSource)) {
             return false;
         }
 
-        m_buffer = std::make_shared<std::vector<char>>(std::move(buffer));
+        if (!m_data->buffer.empty()) {
+            return true;
+        }
+
+        m_data->buffer = m_data->loadSource();
+
+        if (m_data->buffer.empty()) {
+            return false;
+        }
+
         return true;
     }
 
     bool isValid() {
-        return (m_buffer && !m_buffer->empty()) || !m_uri.empty() || bool(m_loadSource);
+        if (!m_uri.empty())  { return true; }
+
+        if (m_data) {
+            if (!m_data->buffer.empty()) { return true; }
+
+
+            if (resolveSource()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 protected:
     std::string m_uri = "";
-    std::shared_ptr<std::vector<char>> m_buffer;
-    LoadSourceHandle m_loadSource = nullptr;
+
+    struct Data {
+        Data() {}
+        Data(std::vector<char> buffer) : buffer(buffer), loadSource(nullptr) {}
+        Data(LoadSourceHandle source) : buffer(), loadSource(source) {}
+
+        std::vector<char> buffer;
+        LoadSourceHandle loadSource;
+    };
+
+    std::shared_ptr<Data> m_data;
 };
 }
