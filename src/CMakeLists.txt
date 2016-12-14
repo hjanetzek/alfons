@@ -7,6 +7,10 @@ add_library (linebreak
   linebreak/linebreakdata.c
   linebreak/linebreakdef.c)
 
+target_compile_options(linebreak
+    PRIVATE
+    ${ALFONS_CXX_FLAGS})
+
 target_include_directories (linebreak
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/linebreak)
@@ -51,6 +55,7 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options(alfons
     PRIVATE
+    ${ALFONS_CXX_FLAGS}
     -D_USE_MATH_DEFINES
     -utf-8
     -wd4267
