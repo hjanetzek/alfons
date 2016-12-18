@@ -214,7 +214,6 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _position, float _w
 
             _position.y += _line.height();
             _position.x = startX;
-            lineWidth = 0;
         }
     }
 
