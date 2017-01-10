@@ -30,7 +30,10 @@ public:
     InputSource(LoadSourceHandle _loadSource)
         : m_data(std::make_shared<Data>(_loadSource)) {}
 
-    InputSource(std::vector<char> _data)
+    InputSource(const std::vector<char>& _data)
+        : m_data(std::make_shared<Data>(_data)) {}
+
+    InputSource(std::vector<char>&& _data)
         : m_data(std::make_shared<Data>(std::move(_data))) {}
 
     InputSource(const char* data, size_t len)
