@@ -22,8 +22,7 @@ public:
     ~FontManager() {}
 
 
-    std::shared_ptr<Font> addFont(std::string _name, InputSource _source,
-                                  Font::Properties _properties);
+    std::shared_ptr<Font> addFont(std::string _name, Font::Properties _properties, InputSource _source = {});
 
     std::shared_ptr<Font> getFont(std::string _name, Font::Properties _properties);
 
