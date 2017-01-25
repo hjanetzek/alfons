@@ -392,6 +392,8 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
 
         m_glyphAdded.assign(length, 0);
 
+        bool missingGlyphs = true;
+
         for (auto& face : _font->getFontSet(run.language)) {
 
             if (!face->load()) { continue; }
@@ -414,9 +416,12 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
             }
 
             if (processRun(*face, run, _layout.metrics())) {
+                missingGlyphs = false;
                 break;
             }
         }
+
+        if (missingGlyphs) { _layout.setMissingGlyphs(); }
 
         for (size_t i = 0; i < length; i++) {
             if (m_glyphAdded[i]) {

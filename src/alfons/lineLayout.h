@@ -78,6 +78,8 @@ class LineLayout {
     float m_middleLineFactor = 1;
     float m_scale = 1;
 
+    bool m_missingGlyphs = false;
+
 public:
 
     LineLayout() {}
@@ -184,6 +186,9 @@ public:
     // Default-value is 0, otherwise getOffsetY() for "ALIGN_MIDDLE"
     // will return middleLineFactor * (getAscent() - getDescent())
     void setMiddleLineFactor(float factor) { m_middleLineFactor = factor; }
+
+    void setMissingGlyphs() { m_missingGlyphs = true; }
+    bool missingGlyphs() const { return m_missingGlyphs; }
 };
 
 }
