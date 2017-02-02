@@ -455,10 +455,10 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const std::string& _t
                              hb_language_t _langHint, hb_direction_t _direction) {
 
     auto text = UnicodeString::fromUTF8(_text);
-    return shape(_font, text, _langHint, _direction);
+    return shapeICU(_font, text, _langHint, _direction);
 }
 
-LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, UnicodeString& _text,
+LineLayout TextShaper::shapeICU(std::shared_ptr<Font>& _font, const UnicodeString& _text,
                              hb_language_t _langHint, hb_direction_t _direction) {
     LineLayout layout(_font);
 
