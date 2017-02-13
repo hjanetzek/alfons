@@ -439,13 +439,6 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
 
     if (shapes.empty()) { return false; }
 
-    for (auto it = shapes.rbegin(); it != shapes.rend(); ++it) {
-        if (it->cluster) {
-            it->mustBreak = true;
-            break;
-        }
-    }
-
     _layout.addShapes(shapes);
 
     return true;

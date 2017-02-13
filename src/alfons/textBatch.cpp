@@ -61,8 +61,6 @@ bool TextBatch::clip(Quad& _quad) const {
              _quad.x3 < m_clip.x1 && _quad.x4 < m_clip.x1) ||
             (_quad.y1 < m_clip.y1 && _quad.y2 < m_clip.y1 &&
              _quad.y3 < m_clip.y1 && _quad.y4 < m_clip.y1));
-    return false;
-
 }
 
 void TextBatch::setupRect(const Shape& _shape, const glm::vec2& _position,
@@ -217,9 +215,8 @@ glm::vec2 TextBatch::draw(const LineLayout& _line, glm::vec2 _position, float _w
         }
     }
 
-    if (startShape < _line.shapes().size()-1) {
-        adv = std::max(adv, drawShapeRange(_line, startShape,
-                                           _line.shapes().size()-1,
+    if (startShape < shapeCount) {
+        adv = std::max(adv, drawShapeRange(_line, startShape, shapeCount,
                                            _position, _metrics).x);
         _position.y += _line.height();
     }
