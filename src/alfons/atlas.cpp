@@ -138,6 +138,8 @@ bool GlyphAtlas::getGlyph(const Font& _font, const GlyphKey& _key, AtlasGlyph& _
 
 bool GlyphAtlas::createGlyph(const Font& _font, const GlyphKey& _key, AtlasGlyph& _entry) {
 
+    if (_key.codepoint == 0) { return false; }
+
     auto& fontFace = _font.face(_key.font);
 
     const auto* gd = fontFace.createGlyph(_key.codepoint);

@@ -424,7 +424,8 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
         if (missingGlyphs) { _layout.setMissingGlyphs(); }
 
         for (size_t i = 0; i < length; i++) {
-            if (m_glyphAdded[i]) {
+            if (m_glyphAdded[i] && m_shapes[i].codepoint != 0) {
+
                 shapes.push_back(m_shapes[i]);
 
                 if (m_glyphAdded[i] == 2) {
