@@ -384,12 +384,8 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
 
     for (const TextRun& run : _range) {
         size_t length = run.end - run.start;
-        if (length >= m_shapes.capacity()) {
-            m_shapes.resize(length + 16);
-            m_glyphAdded.resize(m_shapes.capacity());
-            m_linebreaks.reserve(m_shapes.capacity());
-        }
 
+        m_shapes.assign(length, {});
         m_glyphAdded.assign(length, 0);
 
         bool missingGlyphs = true;
