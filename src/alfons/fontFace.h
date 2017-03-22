@@ -106,6 +106,10 @@ public:
         return m_languages;
     }
 
+    Descriptor& descriptor() {
+        return m_descriptor;
+    }
+
 protected:
 
     FreetypeHelper& m_ft;

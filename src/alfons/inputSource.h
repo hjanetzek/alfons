@@ -49,6 +49,10 @@ public:
 
     bool hasSourceCallback() { return m_data && bool(m_data->loadSource); }
 
+    void clearData() {
+        m_data->buffer.clear();
+    }
+
     bool resolveSource() {
         if (!m_data || !bool(m_data->loadSource)) {
             return false;
