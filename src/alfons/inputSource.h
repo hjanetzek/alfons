@@ -24,19 +24,19 @@ public:
 
     InputSource() {}
 
-    InputSource(const std::string& _uri)
+    explicit InputSource(const std::string& _uri)
         : m_uri(_uri), m_data(std::make_shared<Data>()) {}
 
-    InputSource(LoadSourceHandle _loadSource)
+    explicit InputSource(LoadSourceHandle _loadSource)
         : m_data(std::make_shared<Data>(_loadSource)) {}
 
-    InputSource(const std::vector<char>& _data)
+    explicit InputSource(const std::vector<char>& _data)
         : m_data(std::make_shared<Data>(_data)) {}
 
-    InputSource(std::vector<char>&& _data)
+    explicit InputSource(std::vector<char>&& _data)
         : m_data(std::make_shared<Data>(std::move(_data))) {}
 
-    InputSource(const char* data, size_t len)
+    explicit InputSource(const char* data, size_t len)
         : m_data(std::make_shared<Data>(std::vector<char>{data, data + len})) {}
 
     const std::string& uri() const { return m_uri; }
@@ -86,8 +86,8 @@ protected:
 
     struct Data {
         Data() {}
-        Data(std::vector<char> buffer) : buffer(buffer), loadSource(nullptr) {}
-        Data(LoadSourceHandle source) : buffer(), loadSource(source) {}
+      explicit Data(std::vector<char> buffer) : buffer(std::move(buffer)), loadSource(nullptr) {}
+        explicit Data(LoadSourceHandle source) : buffer(), loadSource(source) {}
 
         std::vector<char> buffer;
         LoadSourceHandle loadSource;

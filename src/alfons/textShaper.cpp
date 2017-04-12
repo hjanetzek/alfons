@@ -304,6 +304,8 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
     bool missingGlyphs = false;
     bool addedGlyphs = false;
 
+    LOGE("glyphs:%d", glyphCount);
+
     for (size_t pos = 0; pos < glyphCount; pos++) {
         hb_codepoint_t codepoint = glyphInfos[pos].codepoint;
         uint32_t clusterId = glyphInfos[pos].cluster;
@@ -333,6 +335,7 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
 
         float advance = glyphPositions[pos].x_advance * FT_INV_SCALE;
 
+        LOGE("add id %d - cp:%lu", id, codepoint);
         if (m_glyphAdded[id]) {
             m_glyphAdded[id] = 2;
 
@@ -421,16 +424,17 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
 
         for (size_t i = 0; i < length; i++) {
             if (m_glyphAdded[i] && m_shapes[i].codepoint != 0) {
-
+                LOGE("%d - cp:%lu", i, m_shapes[i].codepoint);
                 shapes.push_back(m_shapes[i]);
 
                 if (m_glyphAdded[i] == 2) {
                     for (auto& shape : m_clusters[i]) {
+                      LOGE("cluster %d - cp:%lu", i, shape.codepoint);
                         shapes.push_back(shape);
                     }
                     m_clusters[i].clear();
                 }
-            }
+            } else { LOGE("missing glyph!"); }
         }
     }
 
