@@ -317,7 +317,7 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
         }
 
         if (codepoint == 0) {
-            if (m_linebreaks[clusterId] != LINEBREAK_MUSTBREAK) {
+            if (!m_glyphAdded[id] && m_linebreaks[clusterId] != LINEBREAK_MUSTBREAK) {
                 missingGlyphs = true;
             }
             continue;
