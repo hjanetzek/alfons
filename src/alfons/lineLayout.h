@@ -34,7 +34,7 @@ enum class Alignment {
 
 struct Shape {
     // Reference to face within a Font.
-    uint8_t face;
+    uint16_t face;
     union {
         uint8_t flags;
         struct {
@@ -59,7 +59,7 @@ struct Shape {
 
     Shape() : face(0), flags(0), advance(0), codepoint(0) {}
 
-    Shape(uint8_t faceID, uint32_t codepoint, glm::vec2 offset,
+    Shape(uint16_t faceID, uint32_t codepoint, glm::vec2 offset,
           float advance, uint8_t flags)
         : face(faceID),
           flags(flags),

@@ -18,16 +18,15 @@ Font::Font(const Properties& properties)
 
 auto Font::addFace(std::shared_ptr<FontFace> _face, hb_language_t _lang) -> bool {
 
+    if (!_face) { return false; }
+
     if (_lang == HB_LANGUAGE_INVALID) {
         m_faces.push_back(_face);
         return true;
     }
 
     for (auto& face : m_fontFaceMap[_lang]) {
-        if (face == _face) {
-            log("Won't add font twice. %s", _lang);
-            return false;
-        }
+        if (face == _face) { return false; }
     }
 
     m_fontFaceMap[_lang].push_back(_face);

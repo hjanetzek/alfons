@@ -160,7 +160,6 @@ void FontManager::unload(Font& font) {
 }
 
 void FontManager::unload() {
-    // layoutCache.clear();
 
     for (auto& face : m_faces) {
         face->unload();
@@ -170,14 +169,11 @@ void FontManager::unload() {
 std::shared_ptr<FontFace> FontManager::addFontFace(const FontFace::Descriptor& descriptor,
                                                    float baseSize) {
 
-    // FontFace::Key key(descriptor, baseSize);
-    // for (const auto& face : faces) {
-    //     if (face.)
-    // }
-    // auto it = faces.find(key);
-    // if (it != faces.end()) {
-    //     return it->second.faceId;
-    // }
+    if (m_maxFontId == std::numeric_limits<uint16_t>::max()) {
+        LOGE("addFontFace failed: Reached maximum FontFace ID");
+        return nullptr;
+    }
+
     auto face = std::make_shared<FontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
 
     m_faces.push_back(face);
