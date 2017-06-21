@@ -62,6 +62,7 @@ struct TextLine {
 
     // Input
     UnicodeString* text;
+    size_t offset;
     hb_language_t langHint;
     hb_direction_t overallDirection;
 
@@ -72,7 +73,7 @@ struct TextLine {
     // Result
     std::vector<TextRun> runs;
 
-    void set(UnicodeString& _input,
+    void set(UnicodeString& _input, size_t _offset,
              hb_language_t _langHint = HB_LANGUAGE_INVALID,
              hb_direction_t _overallDirection = HB_DIRECTION_INVALID) {
         runs.clear();
@@ -80,6 +81,7 @@ struct TextLine {
         scriptLangItems.clear();
 
         text = &_input;
+        offset = _offset;
         langHint = _langHint;
         overallDirection = _overallDirection;
     }
@@ -293,7 +295,7 @@ TextShaper::~TextShaper() {
 }
 
 bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
-                            FontFace::Metrics& _lineMetrics) {
+                            size_t lineBreakOffset, FontFace::Metrics& _lineMetrics) {
 
     hb_shape(_face.hbFont(), m_hbBuffer, NULL, 0);
 
@@ -317,7 +319,7 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
         }
 
         if (codepoint == 0) {
-            if (!m_glyphAdded[id] && m_linebreaks[clusterId] != LINEBREAK_MUSTBREAK) {
+            if (!m_glyphAdded[id] && m_linebreaks[lineBreakOffset + clusterId] != LINEBREAK_MUSTBREAK) {
                 missingGlyphs = true;
             }
             continue;
@@ -345,12 +347,12 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
             addedGlyphs = true;
             m_glyphAdded[id] = 1;
 
-            uint8_t breakmode = m_linebreaks[clusterId];
+            uint8_t breakmode = m_linebreaks[lineBreakOffset + clusterId];
 
-             uint8_t flags = 1 |           // cluster start
-                //((breakmode == LINEBREAK_MUSTBREAK) ? 2 : 0) | // must break
-                ((breakmode == 1) ? 4 : 0) | // can break
-                ((breakmode == 2) ? 8 : 0) | // no break
+            uint8_t flags = 1 |           // cluster start
+                ((breakmode == LINEBREAK_MUSTBREAK) ? 2 : 0) |
+                ((breakmode == LINEBREAK_ALLOWBREAK) ? 4 : 0) |
+                ((breakmode == LINEBREAK_NOBREAK) ? 8 : 0) |
                 (_face.isSpace(codepoint) ? 16 : 0);
 
             m_shapes[id] = Shape(_face.id(), codepoint, offset, advance, flags);
@@ -411,7 +413,7 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
                 hb_buffer_set_language(m_hbBuffer, run.language);
             }
 
-            if (processRun(*face, run, _layout.metrics())) {
+            if (processRun(*face, run, _line.offset, _layout.metrics())) {
                 missingGlyphs = false;
                 break;
             }
@@ -435,6 +437,9 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
     }
 
     if (shapes.empty()) { return false; }
+
+    // Last char on line: Must break at end of line
+    shapes.back().mustBreak = true;
 
     _layout.addShapes(shapes);
 
@@ -468,16 +473,23 @@ LineLayout TextShaper::shapeICU(std::shared_ptr<Font>& _font, const UnicodeStrin
     int start = 0;
 
     for (int pos = 0; pos < numChars; pos++) {
-        if (m_linebreaks[pos] != 0) { continue; }
+        // Last char is always MUSTBREAK
+        if (m_linebreaks[pos] != LINEBREAK_MUSTBREAK) {
+            continue;
+        }
+
+        // Remove linebreak after final char, this interferes with RTL text.
+        if (pos == numChars - 1) {
+            m_linebreaks[pos] = LINEBREAK_NOBREAK;
+        }
 
         auto cur = _text.tempSubStringBetween(start, pos+1);
 
-        line.set(cur, _langHint, _direction);
+        line.set(cur, start, _langHint, _direction);
         m_itemizer->processLine(line);
 
         shape(_font, line, line.runs, layout);
         start = pos + 1;
-
     }
 
     return layout;
