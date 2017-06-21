@@ -54,7 +54,7 @@ protected:
 
     bool shape(std::shared_ptr<Font>& font, TextLine& line, LineLayout& layout);
 
-    bool processRun(const FontFace& face, const TextRun& run, FontFace::Metrics& _lineMetrics);
+    bool processRun(const FontFace& face, const TextRun& run, size_t lineBreakOffset, FontFace::Metrics& _lineMetrics);
 
     LangHelper m_langHelper;
     std::unique_ptr<TextItemizer> m_itemizer;
