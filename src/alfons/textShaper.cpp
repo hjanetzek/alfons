@@ -455,11 +455,12 @@ LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const std::string& _t
                              hb_language_t _langHint, hb_direction_t _direction) {
 
     auto text = UnicodeString::fromUTF8(_text);
-    return shapeICU(_font, text, _langHint, _direction);
+    return shapeICU(_font, text, 1, 0, _langHint, _direction);
 }
 
 LineLayout TextShaper::shapeICU(std::shared_ptr<Font>& _font, const UnicodeString& _text,
-                             hb_language_t _langHint, hb_direction_t _direction) {
+                                int _minLineChars, int _maxLineChars,
+                                hb_language_t _langHint, hb_direction_t _direction) {
     LineLayout layout(_font);
 
     int numChars = _text.length();
@@ -476,25 +477,45 @@ LineLayout TextShaper::shapeICU(std::shared_ptr<Font>& _font, const UnicodeStrin
 
     auto &line = *m_textLine;
     int start = 0;
+    int lastBreak = -1;
 
-    for (int pos = 0; pos < numChars; pos++) {
-        // Last char is always MUSTBREAK
-        if (m_linebreaks[pos] != LINEBREAK_MUSTBREAK) {
+    for (int pos = 0; pos < numChars;) {
+
+        bool breakLine = m_linebreaks[pos] == LINEBREAK_MUSTBREAK;
+        if (breakLine) {
+            lastBreak = pos;
+
+            // Last char is always MUSTBREAK
+            // Remove linebreak after final char, this interfers with RTL text.
+            if (pos == numChars - 1) {
+                m_linebreaks[pos] = LINEBREAK_NOBREAK;
+            }
+        }
+
+        if (_maxLineChars > 0) {
+            if (m_linebreaks[pos] == LINEBREAK_ALLOWBREAK) {
+                lastBreak = pos;
+            }
+            // Break if line got longer than maxLineChars and there is
+            // a new ALLOWBREAK position since last break.
+            if (pos - start >= _maxLineChars-1 && lastBreak - start >= _minLineChars) {
+                breakLine = true;
+            }
+        }
+
+        if (!breakLine) {
+            pos++;
             continue;
         }
 
-        // Remove linebreak after final char, this interferes with RTL text.
-        if (pos == numChars - 1) {
-            m_linebreaks[pos] = LINEBREAK_NOBREAK;
-        }
-
-        auto cur = _text.tempSubStringBetween(start, pos+1);
+        auto cur = _text.tempSubStringBetween(start, lastBreak+1);
 
         line.set(cur, start, _langHint, _direction);
         m_itemizer->processLine(line);
 
         shape(_font, line, line.runs, layout);
-        start = pos + 1;
+
+        pos = start = lastBreak+1;
     }
 
     return layout;

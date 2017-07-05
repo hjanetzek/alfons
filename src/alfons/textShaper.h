@@ -33,8 +33,9 @@ public:
 
 
     LineLayout shapeICU(std::shared_ptr<Font>& font, const UnicodeString& text,
-                     hb_language_t langHint = HB_LANGUAGE_INVALID,
-                     hb_direction_t direction = HB_DIRECTION_INVALID);
+                        int minLineChars = 1, int maxLineChars = 0,
+                        hb_language_t langHint = HB_LANGUAGE_INVALID,
+                        hb_direction_t direction = HB_DIRECTION_INVALID);
 
     LineLayout shape(std::shared_ptr<Font>& font, const std::string& text,
                      hb_language_t langHint = HB_LANGUAGE_INVALID,
