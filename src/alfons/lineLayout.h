@@ -109,6 +109,17 @@ public:
         m_shapes.insert(m_shapes.end(), _shapes.begin(), _shapes.end());
     }
 
+    void removeShapes(size_t _start, size_t _end) {
+        if (_start > _end || _end > shapes().size()) { return; }
+
+        auto it = m_shapes.begin() + _start;
+        const auto end = m_shapes.begin() + _end;
+
+        for (; it != end; ++it) { m_advance -= it->advance;}
+
+        m_shapes.erase(m_shapes.begin() + _start, end);
+    }
+
     std::vector<Shape>& shapes() { return m_shapes; }
     const std::vector<Shape>& shapes() const { return m_shapes; }
 
