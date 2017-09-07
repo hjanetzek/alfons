@@ -94,8 +94,8 @@ bool FontFace::load() {
         }
 
     } else {
-        auto &buffer = m_descriptor.source.buffer();
-        error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte *>(buffer.data()),
+        auto& buffer = m_descriptor.source.buffer();
+        error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte*>(buffer.data()),
                                    buffer.size(), m_descriptor.faceIndex, &m_ftFace);
         if (error) {
             LOGE("Could not create font: error: %d", error);
@@ -128,6 +128,7 @@ bool FontFace::load() {
                      dpi);      // vertical_resolution
 
 
+    // This must take place after ftFace is properly scaled and transformed
     m_hbFont = hb_ft_font_create(m_ftFace, nullptr);
 
     m_metrics.height = m_ftFace->size->metrics.height / 64.f;
@@ -153,7 +154,7 @@ bool FontFace::load() {
     if (m_spaceSeparators.empty()) {
         for (size_t i = 0; i < SPACE_SEPARATORS_COUNT; i++) {
             auto codepoint = static_cast<hb_codepoint_t>(
-                    FT_Get_Char_Index(m_ftFace, SPACE_SEPARATORS[i]));
+                FT_Get_Char_Index(m_ftFace, SPACE_SEPARATORS[i]));
 
             if (codepoint) {
                 if (std::find(m_spaceSeparators.begin(),
