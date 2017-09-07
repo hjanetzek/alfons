@@ -72,9 +72,16 @@ bool AppleFontFace::load() {
     // Set font metrics from cgFont and ctFont
     CTFontRef ctFont = CTFontCreateWithGraphicsFont(cgFont, m_baseSize, nullptr, nullptr);
 
-    m_metrics.height = CGFontGetCapHeight(cgFont);
-    m_metrics.ascent = CGFontGetAscent(cgFont);
-    m_metrics.descent = -CGFontGetDescent(cgFont);
+    hb_font_set_scale(m_hbFont,
+                      (static_cast<uint64_t>(m_ftFace->size->metrics.x_scale) *
+                       static_cast<uint64_t>(m_ftFace->units_per_EM)) >> 16,
+                      (static_cast<uint64_t>(m_ftFace->size->metrics.y_scale) *
+                       static_cast<uint64_t>(m_ftFace->units_per_EM)) >> 16);
+    hb_font_set_ppem(m_hbFont, m_ftFace->size->metrics.x_ppem, m_ftFace->size->metrics.y_ppem);
+
+    m_metrics.height = CGFontGetCapHeight(cgFont) / (float)::CGFontGetUnitsPerEm(cgFont) * m_baseSize;
+    m_metrics.ascent = CGFontGetAscent(cgFont) / (float)::CGFontGetUnitsPerEm(cgFont) * m_baseSize;
+    m_metrics.descent = -CGFontGetDescent(cgFont) / (float)::CGFontGetUnitsPerEm(cgFont) * m_baseSize;
 
     m_metrics.lineThickness = CTFontGetUnderlineThickness(ctFont);
     m_metrics.underlineOffset = -CTFontGetUnderlinePosition(ctFont);
