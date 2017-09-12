@@ -1,8 +1,6 @@
-#ifdef __APPLE__
 #import <Foundation/Foundation.h>
 #import "appleFontConverter/FontConverter.h"
 #include <hb-coretext.h>
-#endif
 
 #include "appleFontFace.h"
 #include "logger.h"
@@ -10,8 +8,8 @@
 namespace alfons {
 
 AppleFontFace::AppleFontFace(FreetypeHelper& _ft, FaceID _faceId, const Descriptor& _descriptor,
-                             float _baseSize) :
-                             FontFace(_ft, _faceId, _descriptor, _baseSize) {}
+                             float _baseSize)
+    : FontFace(_ft, _faceId, _descriptor, _baseSize) {}
 
 bool AppleFontFace::load() {
 
@@ -23,7 +21,6 @@ bool AppleFontFace::load() {
         return false;
     }
 
-#ifdef __APPLE__
     auto &fontName = m_descriptor.source.uri();
     CFStringRef name = CFStringCreateWithCString(nullptr, fontName.c_str(), kCFStringEncodingUTF8);
     CGFontRef cgFont = CGFontCreateWithFontName(name);
@@ -93,8 +90,6 @@ bool AppleFontFace::load() {
 
     m_loaded = true;
     return true;
-#else
-    return false;
-#endif
 }
+
 }
