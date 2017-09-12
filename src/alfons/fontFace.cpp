@@ -25,6 +25,27 @@ static const size_t SPACE_SEPARATORS_COUNT = sizeof(SPACE_SEPARATORS) / sizeof(F
 
 namespace alfons {
 
+// See http://www.microsoft.com/typography/otspec/name.htm for a list of some
+// possible platform-encoding pairs.  We're interested in 0-3 aka 3-1 - UCS-2.
+// Otherwise, fail. If a font has some unicode map, but lacks UCS-2 - it is a
+// broken or irrelevant font. What exactly Freetype will select on face load
+// (it promises most wide unicode, and if that will be slower that UCS-2 -
+// left as an excercise to check.)
+
+FT_Error FontFace::force_ucs2_charmap(FT_Face face) {
+    for (int i = 0; i < face->num_charmaps; i++) {
+        auto platform_id = face->charmaps[i]->platform_id;
+        auto encoding_id = face->charmaps[i]->encoding_id;
+
+        if (((platform_id == 0) && (encoding_id == 3)) ||
+            ((platform_id == 3) && (encoding_id == 1))) {
+            return FT_Set_Charmap(face, face->charmaps[i]);
+        }
+    }
+
+    return -1;
+}
+
 FontFace::FontFace(FreetypeHelper& _ft, FaceID _faceId,
                    const Descriptor& _descriptor, float _baseSize)
     : m_ft(_ft), m_id(_faceId), m_descriptor(_descriptor),
