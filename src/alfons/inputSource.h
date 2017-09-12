@@ -24,8 +24,8 @@ public:
 
     InputSource() {}
 
-    InputSource(const std::string& _uri, bool appleFont = false)
-        : m_uri(_uri), m_data(std::make_shared<Data>()), m_appleFont(appleFont) {}
+    InputSource(const std::string& _uri, bool systemFontName = false)
+        : m_uri(_uri), m_data(std::make_shared<Data>()), m_systemFontName(systemFontName) {}
 
     InputSource(LoadSourceHandle _loadSource)
         : m_data(std::make_shared<Data>(_loadSource)) {}
@@ -45,9 +45,9 @@ public:
         return m_data->buffer;
     }
 
-    bool isUri() const { return !m_appleFont && !m_uri.empty(); }
+    bool isUri() const { return !m_systemFontName && !m_uri.empty(); }
 
-    bool isAppleFont() const { return m_appleFont; }
+    bool isSystemFont() const { return m_systemFontName; }
 
     bool hasSourceCallback() { return m_data && bool(m_data->loadSource); }
 
@@ -105,6 +105,6 @@ protected:
 
     std::shared_ptr<Data> m_data;
 
-    bool m_appleFont = false;
+    bool m_systemFontName = false;
 };
 }

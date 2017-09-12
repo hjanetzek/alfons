@@ -177,7 +177,7 @@ std::shared_ptr<FontFace> FontManager::addFontFace(const FontFace::Descriptor& d
 
     std::shared_ptr<FontFace> face = nullptr;
 
-    if (descriptor.source.isAppleFont()) {
+    if (descriptor.source.isSystemFont()) {
     #ifdef __APPLE__
         face = std::make_shared<AppleFontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
     #else

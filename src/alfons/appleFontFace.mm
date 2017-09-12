@@ -18,7 +18,7 @@ bool AppleFontFace::load() {
     if (m_loaded) { return true; }
     if (m_invalid) { return false; }
 
-    if (!m_descriptor.source.isValid() || !m_descriptor.source.isAppleFont()) {
+    if (!m_descriptor.source.isValid() || !m_descriptor.source.isSystemFont()) {
         m_invalid = true;
         return false;
     }
