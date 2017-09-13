@@ -29,18 +29,24 @@ bool AppleFontFace::load() {
         m_invalid = true;
         return false;
     }
-    std::vector<char> fontData = [FontConverter fontDataForCGFont:cgFont];
-    if (fontData.empty()) {
-        LOGE("Font data read from apple system font '%s' is empty.", fontName.c_str());
-        m_invalid = true;
-        return false;
+
+    if (!m_descriptor.source.hasData()) {
+        std::vector<char> fontData = [FontConverter fontDataForCGFont:cgFont];
+        if (fontData.empty()) {
+            LOGE("Font data read from apple system font '%s' is empty.", fontName.c_str());
+            m_invalid = true;
+            return false;
+        }
+
+        // Use raw system fontData to create freetype face for glyph rendering
+        m_descriptor.source.setData(fontData);
+    } else {
+        LOGD("Reusing converted font data");
     }
 
-    // Use raw system fontData to create freetype face for glyph rendering
-    m_descriptor.source.resetData(fontData);
     auto &buffer = m_descriptor.source.buffer();
     FT_Error error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte *>(buffer.data()),
-                               buffer.size(), m_descriptor.faceIndex, &m_ftFace);
+                                        buffer.size(), m_descriptor.faceIndex, &m_ftFace);
 
     if (error) {
         LOGE("Could not create font: error: %d", error);

@@ -27,16 +27,16 @@ public:
     InputSource(const std::string& _uri, bool systemFontName = false)
         : m_uri(_uri), m_data(std::make_shared<Data>()), m_systemFontName(systemFontName) {}
 
-    InputSource(LoadSourceHandle _loadSource)
+    explicit InputSource(LoadSourceHandle _loadSource)
         : m_data(std::make_shared<Data>(_loadSource)) {}
 
-    InputSource(const std::vector<char>& _data)
+    explicit InputSource(const std::vector<char>& _data)
         : m_data(std::make_shared<Data>(_data)) {}
 
-    InputSource(std::vector<char>&& _data)
+    explicit InputSource(std::vector<char>&& _data)
         : m_data(std::make_shared<Data>(std::move(_data))) {}
 
-    InputSource(const char* data, size_t len)
+    explicit InputSource(const char* data, size_t len)
         : m_data(std::make_shared<Data>(std::vector<char>{data, data + len})) {}
 
     const std::string& uri() const { return m_uri; }
@@ -50,10 +50,6 @@ public:
     bool isSystemFont() const { return m_systemFontName; }
 
     bool hasSourceCallback() { return m_data && bool(m_data->loadSource); }
-
-    void clearData() {
-        m_data->buffer.clear();
-    }
 
     bool resolveSource() {
         if (!m_data || !bool(m_data->loadSource)) {
@@ -87,9 +83,13 @@ public:
         return false;
     }
 
-    void resetData(std::vector<char> buffer) {
-        m_data.reset(new Data(buffer));
+    void setData(std::vector<char> buffer) {
+        std::swap(m_data->buffer, buffer);
     }
+
+    bool hasData() { return bool(m_data) && !m_data->buffer.empty(); }
+
+    void clearData() { m_data->buffer.clear(); }
 
 protected:
     std::string m_uri = "";
