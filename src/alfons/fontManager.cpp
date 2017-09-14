@@ -9,6 +9,7 @@
  */
 
 #include "fontManager.h"
+#include "appleFontFace.h"
 #include "logger.h"
 
 #include <memory>
@@ -174,7 +175,17 @@ std::shared_ptr<FontFace> FontManager::addFontFace(const FontFace::Descriptor& d
         return nullptr;
     }
 
-    auto face = std::make_shared<FontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
+    std::shared_ptr<FontFace> face = nullptr;
+
+    if (descriptor.source.isSystemFont()) {
+#ifdef HAVE_CORETEXT
+        face = std::make_shared<AppleFontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
+#else
+        return nullptr;
+#endif
+    } else {
+        face = std::make_shared<FontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
+    }
 
     m_faces.push_back(face);
 

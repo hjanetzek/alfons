@@ -11,8 +11,7 @@ target_include_directories (linebreak
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/linebreak)
 
-
-add_library (alfons
+set(ALFONS_SRC
   alfons/alfons.cpp
   alfons/fontManager.cpp
   alfons/fontFace.cpp
@@ -26,6 +25,15 @@ add_library (alfons
   alfons/path/splinePath.cpp
   # TODO part of icu-extras
   alfons/scrptrun.cpp)
+
+if (APPLE AND HB_HAVE_CORETEXT)
+  list(APPEND ALFONS_SRC alfons/appleFontConverter/fontConverter.mm)
+  list(APPEND ALFONS_SRC alfons/appleFontFace.mm)
+
+  add_definitions(-DHAVE_CORETEXT)
+endif()
+
+add_library(alfons ${ALFONS_SRC})
 
 target_include_directories (alfons
   PUBLIC

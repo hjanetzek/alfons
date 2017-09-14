@@ -82,13 +82,13 @@ public:
     FontFace(FreetypeHelper& _ft, FaceID faceId,
              const Descriptor& descriptor, float baseSize);
 
-    ~FontFace();
+    virtual ~FontFace();
 
     bool isSpace(hb_codepoint_t codepoint) const;
     hb_codepoint_t getCodepoint(FT_ULong charCode) const;
     std::string getFullName() const;
 
-    bool load();
+    virtual bool load();
     void unload();
 
     const GlyphData* createGlyph(hb_codepoint_t codepoint) const;
@@ -130,6 +130,8 @@ protected:
 
     std::vector<hb_script_t> m_scripts;
     std::vector<hb_language_t> m_languages;
+
+    static FT_Error force_ucs2_charmap(FT_Face face);
 };
 
 }

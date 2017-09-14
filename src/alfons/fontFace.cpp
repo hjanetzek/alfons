@@ -15,6 +15,16 @@
 
 #include <hb-ft.h>
 
+
+
+static const FT_ULong SPACE_SEPARATORS[] = {
+    0x0020, 0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005,
+    0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000};
+
+static const size_t SPACE_SEPARATORS_COUNT = sizeof(SPACE_SEPARATORS) / sizeof(FT_ULong);
+
+namespace alfons {
+
 // See http://www.microsoft.com/typography/otspec/name.htm for a list of some
 // possible platform-encoding pairs.  We're interested in 0-3 aka 3-1 - UCS-2.
 // Otherwise, fail. If a font has some unicode map, but lacks UCS-2 - it is a
@@ -22,7 +32,7 @@
 // (it promises most wide unicode, and if that will be slower that UCS-2 -
 // left as an excercise to check.)
 
-static FT_Error force_ucs2_charmap(FT_Face face) {
+FT_Error FontFace::force_ucs2_charmap(FT_Face face) {
     for (int i = 0; i < face->num_charmaps; i++) {
         auto platform_id = face->charmaps[i]->platform_id;
         auto encoding_id = face->charmaps[i]->encoding_id;
@@ -35,14 +45,6 @@ static FT_Error force_ucs2_charmap(FT_Face face) {
 
     return -1;
 }
-
-static const FT_ULong SPACE_SEPARATORS[] = {
-    0x0020, 0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005,
-    0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000};
-
-static const size_t SPACE_SEPARATORS_COUNT = sizeof(SPACE_SEPARATORS) / sizeof(FT_ULong);
-
-namespace alfons {
 
 FontFace::FontFace(FreetypeHelper& _ft, FaceID _faceId,
                    const Descriptor& _descriptor, float _baseSize)
@@ -87,7 +89,7 @@ bool FontFace::load() {
     if (m_loaded) {  return true; }
     if (m_invalid) { return false; }
 
-    if (!m_descriptor.source.isValid()) {
+    if (!m_descriptor.source.isValid() || m_descriptor.source.isSystemFont()) {
         m_invalid = true;
         return false;
     }
@@ -117,7 +119,7 @@ bool FontFace::load() {
         error = FT_New_Memory_Face(m_ft.getLib(), reinterpret_cast<const FT_Byte*>(buffer.data()),
                                    buffer.size(), m_descriptor.faceIndex, &m_ftFace);
         if (error) {
-            LOGE("Coul not create font: error: %d", error);
+            LOGE("Could not create font: error: %d", error);
             m_invalid = true;
             return false;
         }
@@ -145,6 +147,7 @@ bool FontFace::load() {
                      m_baseSize * 64, // char_height in 26.6 fixed-point
                      dpi,       // horizontal_resolution
                      dpi);      // vertical_resolution
+
 
     // This must take place after ftFace is properly scaled and transformed
     m_hbFont = hb_ft_font_create(m_ftFace, nullptr);
