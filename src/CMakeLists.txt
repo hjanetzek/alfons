@@ -26,9 +26,11 @@ set(ALFONS_SRC
   # TODO part of icu-extras
   alfons/scrptrun.cpp)
 
-if(APPLE)
-    list(APPEND ALFONS_SRC alfons/appleFontConverter/fontConverter.mm)
-    list(APPEND ALFONS_SRC alfons/appleFontFace.mm)
+if (APPLE AND HB_HAVE_CORETEXT)
+  list(APPEND ALFONS_SRC alfons/appleFontConverter/fontConverter.mm)
+  list(APPEND ALFONS_SRC alfons/appleFontFace.mm)
+
+  add_definitions(-DHAVE_CORETEXT)
 endif()
 
 add_library(alfons ${ALFONS_SRC})

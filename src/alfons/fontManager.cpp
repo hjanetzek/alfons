@@ -178,11 +178,11 @@ std::shared_ptr<FontFace> FontManager::addFontFace(const FontFace::Descriptor& d
     std::shared_ptr<FontFace> face = nullptr;
 
     if (descriptor.source.isSystemFont()) {
-    #ifdef __APPLE__
+#ifdef HAVE_CORETEXT
         face = std::make_shared<AppleFontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
-    #else
+#else
         return nullptr;
-    #endif
+#endif
     } else {
         face = std::make_shared<FontFace>(m_ftHelper, m_maxFontId++, descriptor, baseSize);
     }

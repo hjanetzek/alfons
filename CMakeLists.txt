@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+if (APPLE)
+  option(HB_HAVE_CORETEXT "Enable CoreText shaper backend on macOS" ON)
+endif ()
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/glm.cmake)
 
 if (NOT DEFINED ALFONS_DEPS_LIBRARIES)
