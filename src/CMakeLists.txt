@@ -30,6 +30,10 @@ if (APPLE AND HB_HAVE_CORETEXT)
   list(APPEND ALFONS_SRC alfons/appleFontConverter/fontConverter.mm)
   list(APPEND ALFONS_SRC alfons/appleFontFace.mm)
 
+  set(ALFONS_APPLE_LIBRARIES
+    "-framework CoreGraphics"
+    "-framework Foundation")
+
   add_definitions(-DHAVE_CORETEXT)
 endif()
 
@@ -45,6 +49,7 @@ target_include_directories (alfons
 target_link_libraries (alfons
   LINK_PUBLIC
   linebreak
+  ${ALFONS_APPLE_LIBRARIES}
   ${ALFONS_DEPS_LIBRARIES})
 
 if (USE_OWN_GLM)
