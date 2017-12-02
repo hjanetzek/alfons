@@ -2,8 +2,17 @@
 #import "appleFontConverter/FontConverter.h"
 #include <hb-coretext.h>
 
+#include <hb-ft.h>
+
 #include "appleFontFace.h"
 #include "logger.h"
+
+#include <TargetConditionals.h>
+
+#if TARGET_OS_MAC
+#import <AppKit/AppKit.h>
+#endif
+
 
 namespace alfons {
 
@@ -24,6 +33,20 @@ bool AppleFontFace::load() {
     auto &fontName = m_descriptor.source.uri();
     CFStringRef name = CFStringCreateWithCString(nullptr, fontName.c_str(), kCFStringEncodingUTF8);
     CGFontRef cgFont = CGFontCreateWithFontName(name);
+    bool systemDefaultFont = false;
+#if TARGET_OS_MAC
+    if (!cgFont) {
+        // On macOS 10.12+ some default system font names start with `.AppleSystemUIFont`, for such fonts we need
+        // NSFont to get CGFontRef
+        NSString* nsFontName = [NSString stringWithUTF8String:fontName.c_str()];
+        NSFont *font = [NSFont fontWithName:nsFontName size:1.0];
+        if (font) {
+            cgFont = CTFontCopyGraphicsFont(CTFontRef(font), nullptr);
+            systemDefaultFont = true;
+        }
+    }
+#endif
+
     if (!cgFont) {
         LOGE("Cannot create font with name '%s'", fontName.c_str());
         m_invalid = true;
@@ -70,7 +93,14 @@ bool AppleFontFace::load() {
                      dpi);      // vertical_resolution
 
     // Create harfbuzz font context using CGFont
-    m_hbFont = hb_font_create(hb_coretext_face_create(cgFont));
+    if (!systemDefaultFont) {
+        m_hbFont = hb_font_create(hb_coretext_face_create(cgFont));
+    } else {
+        // harfbuzz font created from coretext ".AppleSystemUIFont" default
+        // font face seems to be missing MORT and MORX tables which are required
+        // for harfbuzz shape planner code. Hence taking this route.
+        m_hbFont = hb_ft_font_create(m_ftFace, nullptr);
+    }
 
     // Set font metrics from cgFont and ctFont
     CTFontRef ctFont = CTFontCreateWithGraphicsFont(cgFont, m_baseSize, nullptr, nullptr);
