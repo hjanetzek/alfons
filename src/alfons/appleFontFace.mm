@@ -2,14 +2,12 @@
 #import "appleFontConverter/FontConverter.h"
 #include <hb-coretext.h>
 
-#include <hb-ft.h>
-
 #include "appleFontFace.h"
 #include "logger.h"
 
 #include <TargetConditionals.h>
 
-#if TARGET_OS_MAC
+#if TARGET_OS_OSX
 #import <AppKit/AppKit.h>
 #endif
 
@@ -31,10 +29,11 @@ bool AppleFontFace::load() {
     }
 
     auto &fontName = m_descriptor.source.uri();
+
     CFStringRef name = CFStringCreateWithCString(nullptr, fontName.c_str(), kCFStringEncodingUTF8);
     CGFontRef cgFont = CGFontCreateWithFontName(name);
-    bool systemDefaultFont = false;
-#if TARGET_OS_MAC
+
+#if TARGET_OS_OSX
     if (!cgFont) {
         // On macOS 10.12+ some default system font names start with `.AppleSystemUIFont`, for such fonts we need
         // NSFont to get CGFontRef
@@ -42,7 +41,6 @@ bool AppleFontFace::load() {
         NSFont *font = [NSFont fontWithName:nsFontName size:1.0];
         if (font) {
             cgFont = CTFontCopyGraphicsFont(CTFontRef(font), nullptr);
-            systemDefaultFont = true;
         }
     }
 #endif
@@ -92,18 +90,11 @@ bool AppleFontFace::load() {
                      dpi,       // horizontal_resolution
                      dpi);      // vertical_resolution
 
-    // Create harfbuzz font context using CGFont
-    if (!systemDefaultFont) {
-        m_hbFont = hb_font_create(hb_coretext_face_create(cgFont));
-    } else {
-        // harfbuzz font created from coretext ".AppleSystemUIFont" default
-        // font face seems to be missing MORT and MORX tables which are required
-        // for harfbuzz shape planner code. Hence taking this route.
-        m_hbFont = hb_ft_font_create(m_ftFace, nullptr);
-    }
-
     // Set font metrics from cgFont and ctFont
     CTFontRef ctFont = CTFontCreateWithGraphicsFont(cgFont, m_baseSize, nullptr, nullptr);
+
+    // Create harfbuzz font context using CTFont (New API available in hb 1.7.2)
+    m_hbFont = hb_coretext_font_create(ctFont);
 
     hb_font_set_scale(m_hbFont,
                       (static_cast<uint64_t>(m_ftFace->size->metrics.x_scale) *

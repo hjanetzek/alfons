@@ -11,7 +11,11 @@ if (NOT DEFINED ALFONS_DEPS_LIBRARIES)
   include(FindPkgConfig)
   pkg_check_modules(ICU REQUIRED icu-uc)
   pkg_check_modules(FREETYPE REQUIRED freetype2)
-  pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
+  if (APPLE)
+      pkg_check_modules(HARFBUZZ REQUIRED harfbuzz>=1.7.2)
+  else()
+      pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
+  endif()
 
   set(ALFONS_DEPS_LIBRARIES
     ${ICU_LDFLAGS}
