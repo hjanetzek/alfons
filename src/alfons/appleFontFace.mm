@@ -32,6 +32,7 @@ bool AppleFontFace::load() {
 
     CFStringRef name = CFStringCreateWithCString(nullptr, fontName.c_str(), kCFStringEncodingUTF8);
     CGFontRef cgFont = CGFontCreateWithFontName(name);
+    CFRelease(name);
 
 #if TARGET_OS_OSX
     if (!cgFont) {

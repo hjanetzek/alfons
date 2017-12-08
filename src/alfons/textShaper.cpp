@@ -310,7 +310,7 @@ bool TextShaper::processRun(const FontFace& _face, const TextRun& _run,
         hb_codepoint_t codepoint = glyphInfos[pos].codepoint;
         uint32_t clusterId = glyphInfos[pos].cluster;
 
-        auto id = clusterId;
+        uint32_t id;
         // Map cluster position to visual LTR order
         if (_run.direction == HB_DIRECTION_RTL) {
             id = _run.end - clusterId - 1;

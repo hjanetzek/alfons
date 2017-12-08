@@ -155,6 +155,7 @@ static uint32_t calcTableDataRefCheckSum(CFDataRef dataRef)
         CFRelease(tableDataRef);
     }
 
+    CFRelease(tags);
     CFRelease(cgFont);
 
     return data;
