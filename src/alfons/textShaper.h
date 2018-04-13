@@ -32,7 +32,7 @@ public:
     ~TextShaper();
 
 
-    LineLayout shapeICU(std::shared_ptr<Font>& font, const UnicodeString& text,
+    LineLayout shapeICU(std::shared_ptr<Font>& font, const icu::UnicodeString& text,
                         int minLineChars = 1, int maxLineChars = 0,
                         hb_language_t langHint = HB_LANGUAGE_INVALID,
                         hb_direction_t direction = HB_DIRECTION_INVALID);

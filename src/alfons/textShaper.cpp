@@ -61,7 +61,7 @@ struct TextLine {
     using LineItem = Item<int>;
 
     // Input
-    UnicodeString* text;
+    icu::UnicodeString* text;
     size_t offset;
     hb_language_t langHint;
     hb_direction_t overallDirection;
@@ -73,7 +73,7 @@ struct TextLine {
     // Result
     std::vector<TextRun> runs;
 
-    void set(UnicodeString& _input, size_t _offset,
+    void set(icu::UnicodeString& _input, size_t _offset,
              hb_language_t _langHint = HB_LANGUAGE_INVALID,
              hb_direction_t _overallDirection = HB_DIRECTION_INVALID) {
         runs.clear();
@@ -454,11 +454,11 @@ bool TextShaper::shape(std::shared_ptr<Font>& _font, const TextLine& _line,
 LineLayout TextShaper::shape(std::shared_ptr<Font>& _font, const std::string& _text,
                              hb_language_t _langHint, hb_direction_t _direction) {
 
-    auto text = UnicodeString::fromUTF8(_text);
+    auto text = icu::UnicodeString::fromUTF8(_text);
     return shapeICU(_font, text, 1, 0, _langHint, _direction);
 }
 
-LineLayout TextShaper::shapeICU(std::shared_ptr<Font>& _font, const UnicodeString& _text,
+LineLayout TextShaper::shapeICU(std::shared_ptr<Font>& _font, const icu::UnicodeString& _text,
                                 int _minLineChars, int _maxLineChars,
                                 hb_language_t _langHint, hb_direction_t _direction) {
     LineLayout layout(_font);
