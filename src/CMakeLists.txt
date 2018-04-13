@@ -31,9 +31,14 @@ if (APPLE AND HB_HAVE_CORETEXT)
   list(APPEND ALFONS_SRC alfons/appleFontFace.mm)
 
   set(ALFONS_APPLE_LIBRARIES
-    "-framework AppKit"
     "-framework CoreGraphics"
     "-framework Foundation")
+  if(NOT IOS)
+    set(ALFONS_APPLE_LIBRARIES
+        ${ALFONS_APPLE_LIBRARIES}
+        "-framework AppKit")
+  endif()
+  message(STATUS "ALFONS_APPLE_LIBRARIES: " ${ALFONS_APPLE_LIBRARIES})
 
   add_definitions(-DHAVE_CORETEXT)
 endif()
