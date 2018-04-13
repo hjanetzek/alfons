@@ -31,6 +31,7 @@ if (APPLE AND HB_HAVE_CORETEXT)
   list(APPEND ALFONS_SRC alfons/appleFontFace.mm)
 
   set(ALFONS_APPLE_LIBRARIES
+    "-framework AppKit"
     "-framework CoreGraphics"
     "-framework Foundation")
 
