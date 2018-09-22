@@ -96,8 +96,9 @@ protected:
 
     struct Data {
         Data() {}
-        Data(std::vector<char> buffer) : buffer(buffer), loadSource(nullptr) {}
-        Data(LoadSourceHandle source) : buffer(), loadSource(source) {}
+        explicit Data(const std::vector<char>& buffer) : buffer(buffer), loadSource(nullptr) {}
+        explicit Data(std::vector<char>&& buffer) : buffer(std::move(buffer)), loadSource(nullptr) {}
+        explicit Data(LoadSourceHandle source) : buffer(), loadSource(source) {}
 
         std::vector<char> buffer;
         LoadSourceHandle loadSource;
